@@ -1,4 +1,3 @@
-// 1) group by 
 export function groupBy<T, K extends string | number>(
     items: readonly T[], 
     keyFn: (item: T) => K
@@ -16,7 +15,6 @@ export function groupBy<T, K extends string | number>(
 }
 
 
-// 2) update item by id
 export function updateItemById<T extends {id: string | number}>(
     items: readonly T[],
     id: T["id"],
@@ -28,7 +26,6 @@ export function updateItemById<T extends {id: string | number}>(
 }
 
 
-// 3) deep pick
 export function deepPick(obj: unknown, path: string): unknown {
     return path.split(".").reduce((curr, key) => {
         if (typeof curr != "object" || curr === null) {
@@ -39,7 +36,6 @@ export function deepPick(obj: unknown, path: string): unknown {
 }
 
 
-// 4) debounce
 export function debounce<A extends unknown[]>(
     fn: (...args: A) => void,
     ms: number
@@ -54,12 +50,12 @@ export function debounce<A extends unknown[]>(
     };
 }
 
-// 5) unique
+
 export function unique<T>(items: readonly T[]): T[] {
     return [...new Set(items)];
 }
 
-// 6) sortBy
+
 export function sortBy<T>(
     items: readonly T[],
     keyFn: (item: T) => string | number
@@ -75,7 +71,7 @@ export function sortBy<T>(
     });
 }
 
-// 7) partition 
+
 export function partition<T>(
     items: readonly T[],
     predicate: (item: T) => boolean
@@ -93,7 +89,7 @@ export function partition<T>(
 
     return [matching, rest];
 }
-// 8) omit
+
 export function omit<T extends object, K extends keyof T>(
     obj: T,
     keys: readonly K[]
@@ -106,19 +102,16 @@ export function omit<T extends object, K extends keyof T>(
 }
 
 
-
-// 9) getOrDefault
 export function getOrDefault<T>(value: T | null | undefined, fallback: T): T {
     return value ?? fallback;
 }
 
 
-// 10) sleep
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// 11) retry 
+
 export async function retry<T>(
     fn: () => Promise<T>,
     attempts: number
@@ -140,7 +133,6 @@ export async function retry<T>(
     throw lastError;
 }
 
-// 12) countBy
 export function countBy<T, K extends string | number>(
     items: readonly T[],
     keyFn: (item: T) => K
