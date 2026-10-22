@@ -100,4 +100,4 @@ In the second pair, React finds a different element type at the same position (`
 **Evidence:** ![Console for experiment 5](../screenshots/exp5-strict-mode.png)
 
 **Why:**
-In development, Strict Mode intentionally mounts, unmounts, and mounts again so unsafe effects show up early. The extra render and the `effect ran` → `cleanup` → `effect ran` sequence are that double mount. In production this extra pass does not happen.
+In development, Strict Mode renders each component twice to check that rendering is pure, and runs effects as mount, unmount, mount again to check that cleanup undoes the effect properly. Neither extra pass happens in production.
