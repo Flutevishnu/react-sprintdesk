@@ -1,4 +1,26 @@
+import { loadTasks, saveTasks } from './tasksStorage'; // Hour 6
+import  { type ReactNode, useEffect, useReducer} from "react";
 import type { Task, TaskAction } from './model';
+import { TasksContext, TasksDispatchContext } from './TasksContexts';
+
+interface TasksProviderProps {
+    initialTasks?: Task[];
+    children: ReactNode;
+}
+  
+export function TasksProvider({ initialTasks, children }: TasksProviderProps) {
+    const [tasks, dispatch] = useReducer(TaskReducer, initialTasks, (initial) => initial ?? loadTasks());
+
+    useEffect(() => {
+        saveTasks(tasks);
+    }, [tasks]);
+    
+    return (
+        <TasksContext value={tasks}>
+            <TasksDispatchContext value={dispatch}>{children}</TasksDispatchContext>
+        </TasksContext>
+    );
+}
 
 export function TaskReducer(state: Task[], action: TaskAction) : Task[] {
     switch(action.type) {

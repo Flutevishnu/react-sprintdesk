@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Task, TaskAction } from './model';
-import { TaskReducer} from './Tasksreducer';
+import { TaskReducer} from './TasksProvider';
 import { makeTasks, newTask } from '../../lib/utils';
 
 

@@ -12,3 +12,11 @@ export interface Task {
 }
 
 export type NewTaskInput = Omit<Task, "id" | "status" | "createdAt">;
+
+export type TaskChanges = Partial<Omit<Task, "id" | "createdAt">>;
+
+export type TaskAction = {type: "added", task: Task} 
+                        | { type: 'updated'; id: number; changes: TaskChanges } 
+                        | { type: 'deleted'; id: number } 
+                        | { type: 'status_moved'; id: number; status: TaskStatus }
+                        | { type: 'toggled'; id: number };
