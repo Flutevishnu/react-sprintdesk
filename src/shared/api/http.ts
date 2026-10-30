@@ -58,3 +58,7 @@ export const http = {
     delete: <T = void>(url: string, signal?: AbortSignal) => request<T>(url, { method: 'DELETE', signal }),
 };
 
+
+export function isAbortError(error: unknown): boolean {
+    return typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError';
+}
