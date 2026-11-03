@@ -3,6 +3,7 @@ import { fetchTasks, type TaskFilters } from './tasksApi';
 
 export const taskKeys = {
   all: ['tasks'] as const,
+  lists: () => ['tasks', 'list'] as const,
   list: (filters: TaskFilters) => ['tasks', 'list', filters] as const,
 };
 

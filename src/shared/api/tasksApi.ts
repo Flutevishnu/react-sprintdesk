@@ -1,4 +1,4 @@
-import type { Task, TaskStatus } from '../../features/tasks/model';
+import type { Task, TaskChanges, TaskStatus, NewTaskInput } from '../../features/tasks/model';
 import { http } from './http';
 import type { TaskDto } from './types';
 
@@ -6,6 +6,8 @@ export interface TaskFilters {
   status?: TaskStatus;
   q?: string;
 }
+
+export type CreateTaskInput = NewTaskInput & {status? : TaskStatus}
 
 export const toTask = (dto: TaskDto): Task => ({
   ...dto,
@@ -26,4 +28,18 @@ export async function fetchTasks(
 ): Promise<Task[]> {
   const dtos = await http.get<TaskDto[]>(buildTasksUrl(filters), signal);
   return dtos.map(toTask);
+}
+
+export async function createTask(input: CreateTaskInput) : Promise<Task> {
+  const dto = await http.post<TaskDto>('/api/tasks', input);
+  return toTask(dto);
+}
+
+export async function updateTask(id: number, changes: TaskChanges) : Promise<Task> {
+  const dto = await http.patch<TaskDto>(`/api/tasks/${id}`, changes);
+  return toTask(dto);
+} 
+
+export async function deleteTask(id: number): Promise<void> {
+  await http.delete(`/api/tasks/${id}`);
 }
