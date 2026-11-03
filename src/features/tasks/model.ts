@@ -20,3 +20,13 @@ export type TaskAction = {type: "added", task: Task}
                         | { type: 'deleted'; id: number } 
                         | { type: 'status_moved'; id: number; status: TaskStatus }
                         | { type: 'toggled'; id: number };
+
+
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+
+
+export interface RequestOptions {
+    method?: HttpMethod;
+    body?: unknown;
+    signal?: AbortSignal;
+}
