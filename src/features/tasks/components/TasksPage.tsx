@@ -10,18 +10,25 @@ import { useTasksQuery } from '../../../shared/api/useTasksQuery';
 import type { Priority, TaskStatus } from '../model';
 import { useTaskUrlFilters, type SortKey } from '../useTaskUrlFilters';
 import { viewTasks } from '../viewTasks';
-import { TaskEditor, type TaskFormValues } from './TaskEditor';
+import { TaskForm, type TaskFormValues } from './TaskForm';
+import { useDebouncedValue } from '../../hooks/usedebouncedvalue';
+import { PRIORITIES, PRIORITY_LABELS, STATUSES, STATUS_LABELS } from '../../../lib/utils';
+import { StatusCounts } from './StatusCounts';
+import { TaskList } from './TaskList';
+
 
 export function TasksPage() {
   const { filters, setFilters } = useTaskUrlFilters();
+  const debouncedQ = useDebouncedValue(filters.q, 300);
 
+  
   const [editingId, setEditingId] = useState<number | null>(null);
   const [createFormKey, setCreateFormKey] = useState(0);
 
 
   const serverFilters: TaskFilters = {};
   if (filters.status) serverFilters.status = filters.status;
-  if (filters.q) serverFilters.q = filters.q;
+  if (debouncedQ) serverFilters.q = debouncedQ;
 
   const list = useTasksQuery(serverFilters, { throwOnError: true });
   const all = useTasksQuery({}); 
@@ -31,10 +38,8 @@ export function TasksPage() {
   const remove = useDeleteTask();
   const move = useMoveTaskStatus();
 
-  const visible = viewTasks(list.data ?? [], filters);
+  const tasks = viewTasks(list.data ?? [], filters);
   const editing = all.data?.find((t) => t.id === editingId);
-  const counts = { todo: 0, in_progress: 0, done: 0 };
-  for (const task of all.data ?? []) counts[task.status]++;
 
   function handleCreate(values: TaskFormValues) {
     create.mutate(values, { onSuccess: () => setCreateFormKey((k) => k + 1) });
@@ -47,16 +52,16 @@ export function TasksPage() {
   return (
     <main>
       {editing ? (
-        <TaskEditor
+        <TaskForm
           key={editing.id}
-          initial={editing}
+          task={editing}
           isSubmitting={update.isPending}
           error={update.error?.message}
           onSubmit={(values) => handleUpdate(editing.id, values)}
           onCancel={() => setEditingId(null)}
         />
       ) : (
-        <TaskEditor
+        <TaskForm
           key={createFormKey}
           isSubmitting={create.isPending}
           error={create.error?.message}
@@ -65,9 +70,7 @@ export function TasksPage() {
       )}
 
       <h2>Tasks</h2>
-      <p>To do: {counts.todo}</p>
-      <p>In progress: {counts.in_progress}</p>
-      <p>Done: {counts.done}</p>
+      <StatusCounts tasks={all.data ?? []} />
 
       <div>
         <input
@@ -84,9 +87,9 @@ export function TasksPage() {
           }
         >
           <option value="">All</option>
-          <option value="todo">To do</option>
-          <option value="in_progress">In progress</option>
-          <option value="done">Done</option>
+          {STATUSES.map((s) => (
+            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+          ))}
         </select>
         <select
           aria-label="Filter by priority"
@@ -96,9 +99,9 @@ export function TasksPage() {
           }
         >
           <option value="">All</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
+          {PRIORITIES.map((s) => (
+            <option key={s} value={s}>{PRIORITY_LABELS[s]}</option>
+          ))}
         </select>
         <select
           aria-label="Sort by"
@@ -118,34 +121,18 @@ export function TasksPage() {
         <p>Loading...</p>
       ) : all.data?.length === 0 ? (
         <p>No tasks yet. Add your first task above.</p>
-      ) : visible.length === 0 ? (
+      ) : tasks.length === 0 ? (
         <p>No tasks match your filters</p>
       ) : (
-        <ul>
-          {visible.map((task) => (
-            <li key={task.id}>
-              <strong>{task.name}</strong> ({task.priority})
-              {task.description && <span> {task.description}</span>}
-              <select
-                aria-label={`Status of ${task.name}`}
-                value={task.status}
-                onChange={(e) =>
-                  move.mutate({ id: task.id, status: e.target.value as TaskStatus })
-                }
-              >
-                <option value="todo">To do</option>
-                <option value="in_progress">In progress</option>
-                <option value="done">Done</option>
-              </select>
-              <button type="button" aria-label={`Edit ${task.name}`} onClick={() => setEditingId(task.id)}>
-                Edit
-              </button>
-              <button type="button" aria-label={`Delete ${task.name}`} onClick={() => remove.mutate(task.id)}>
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
+        <TaskList
+          tasks={tasks}
+          onEdit={setEditingId}
+          onDelete={(id) => {
+            remove.mutate(id);
+            if (id === editingId) setEditingId(null);
+          }}
+          onStatusChange={(id, status) => move.mutate({ id, status })}
+        />
       )}
     </main>
   );

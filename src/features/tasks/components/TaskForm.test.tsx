@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Task } from '../model';
@@ -95,16 +95,20 @@ describe('TaskForm: create mode', () => {
     });
   });
 
-  it('clears the form after a successful submit', async () => {
+
+  it('disables the button and ignores a second submit while saving', async () => {
     const user = userEvent.setup();
-    render(<TaskForm onSubmit={vi.fn()} />);
+    const onSubmit = vi.fn();
+
+    render(<TaskForm isSubmitting onSubmit={onSubmit} />);
 
     await user.type(screen.getByLabelText('Title'), 'Deploy app');
-    await user.click(screen.getByRole('button', { name: 'Add task' }));
+    expect(screen.getByRole('button', { name: 'Saving...' })).toBeDisabled();
+    fireEvent.submit(screen.getByRole('form', { name: 'Create Task' }));
+    expect(onSubmit).not.toHaveBeenCalled();
 
-    expect(screen.getByLabelText('Title')).toHaveValue('');
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  });
+
+  })
 });
 
 describe('TaskForm: edit mode', () => {

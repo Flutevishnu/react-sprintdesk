@@ -1,8 +1,10 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchTasks, type TaskFilters } from './tasksApi';
 
+const taskRoot = ['tasks'] as const;
+
 export const taskKeys = {
-  all: ['tasks'] as const,
+  all: taskRoot,
   lists: () => ['tasks', 'list'] as const,
   list: (filters: TaskFilters) => ['tasks', 'list', filters] as const,
 };

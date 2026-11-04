@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { http as rest, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { server } from '../../../mocks/server';
@@ -23,7 +23,7 @@ describe('TasksPage', () => {
     renderPage();
     expect(await screen.findByText('Set up project')).toBeInTheDocument();
 
-    const items = screen.getAllByRole('listitem');
+    const items = within(screen.getByRole('list', { name: 'Tasks' })).getAllByRole('listitem');
     expect(items).toHaveLength(5);
     expect(items[0]).toHaveTextContent('Set up project');
     expect(screen.getByText('To do: 2')).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe('TasksPage', () => {
     renderPage();
 
     expect(await screen.findByText('Set up project')).toBeInTheDocument();
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(within(screen.getByRole('list', { name: 'Tasks' })).getAllByRole('listitem')).toHaveLength(1);
     expect(screen.getByText('To do: 2')).toBeInTheDocument();
   });
 
@@ -49,7 +49,7 @@ describe('TasksPage', () => {
     });
 
     expect(window.location.search).toBe('?status=done');
-    await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(1));
+    await waitFor(() => expect(within(screen.getByRole('list', { name: 'Tasks' })).getAllByRole('listitem')).toHaveLength(1));
   });
 
   it('shows a "no matches" state when filters match nothing', async () => {

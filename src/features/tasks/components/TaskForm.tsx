@@ -2,9 +2,12 @@ import type { Task, Priority, TaskStatus } from "../model";
 import { useId, useState, type SubmitEvent } from "react";
 
 
-type  TaskFormValues = Omit<Task, "id" | "createdAt">;
+export type  TaskFormValues = Omit<Task, "id" | "createdAt">;
+
 interface TaskFormProps {
     task?: Task,
+    isSubmitting? : boolean,
+    error? : string | null,
     onSubmit: (values: TaskFormValues) => void,
     onCancel?: () => void;
 }
@@ -33,7 +36,7 @@ function validateName(name: string) : string | null {
     return null;
 }
 export function TaskForm(
-    {task, onSubmit, onCancel} : TaskFormProps
+    {task, isSubmitting=false, error, onSubmit, onCancel} : TaskFormProps
 ) {
 
     const isEditmode = task !== undefined;
@@ -60,10 +63,9 @@ export function TaskForm(
     const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setsubmitAttempted(true);
-        if (nameError !== null) return;
+        if (isSubmitting || nameError !== null) return;
         onSubmit({...values, name:values.name.trim()});
 
-        if(!isEditmode) reset();
     }
 
 
@@ -73,6 +75,7 @@ export function TaskForm(
     return (
         <>
             <form onSubmit={handleSubmit} noValidate aria-label={isEditmode ? "Edit Task" : "Create Task"}>
+                <h2>{task ?  "Edit task" : "Add a task"}</h2>
                 <div>
                     <label htmlFor={`${id}-name`}>Title</label>
                     <input 
@@ -130,10 +133,11 @@ export function TaskForm(
                 </div>
 
 
-                <button type="submit">{isEditmode ? "Save changes" : "Add task"}</button>
+                <button type="submit" disabled={isSubmitting}>{isSubmitting? "Saving..." : isEditmode ? "Save changes" : "Add task"}</button>
                 <button type="button" onClick={reset}>Reset</button>
 
                 {onCancel && (<button type="button" onClick={onCancel}>Cancel</button>)}
+                {error && <p role="alert">{error}</p>}
             </form>
         </>
     )
