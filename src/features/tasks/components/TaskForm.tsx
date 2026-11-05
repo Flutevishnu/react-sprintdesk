@@ -1,9 +1,8 @@
 import  { type Task, PRIORITIES, STATUSES } from "../model";
-import { useId } from "react";
 import * as z from 'zod';
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
-
+import { useEffect, useId, useRef } from 'react';
 
 const NAME_MIN = 3;
 const NAME_MAX = 100;
@@ -52,6 +51,14 @@ export function TaskForm(
     const isEditmode = task !== undefined;
     const id = useId();
 
+    const titleRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isEditmode) {
+            titleRef.current?.focus();
+        }
+    }, [])
+
     const {
         register,
         handleSubmit,
@@ -82,6 +89,7 @@ export function TaskForm(
                         id={`${id}-name`}
                         type="text" 
                         {...register('name')}
+                        ref={titleRef}
                         aria-invalid={nameError !== undefined}
                         aria-describedby={nameError ? `${id}-name-error` : undefined}
                     />

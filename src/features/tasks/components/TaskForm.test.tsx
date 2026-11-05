@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { axe } from 'vitest-axe';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Task } from '../model';
@@ -122,7 +123,12 @@ describe('TaskForm: create mode', () => {
     expect(input).toHaveAccessibleDescription(message.textContent ?? '');
   });
   
-  
+  it('has no accessibility violations', async () => {
+    const { container } = render(<TaskForm onSubmit={vi.fn()} />);
+    const result = await axe(container);
+    // @ts-ignore
+    expect(result).toHaveNoViolations();
+  });
 });
 
 describe('TaskForm: edit mode', () => {
