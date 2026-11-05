@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ApiError, http } from '../shared/api/http';
-import type { TaskDto } from '../shared/api/types';
+import type { TaskDto } from '../shared/api/schema';
 
 const errorOf = (promise: Promise<unknown>) =>
   promise.catch((error: unknown) => error);

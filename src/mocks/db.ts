@@ -1,5 +1,5 @@
-import type { NewTaskDto, TaskDto, TaskPatchDto } from '../shared/api/types';
-
+import type { TaskChanges, NewTaskInput } from '../features/tasks/model';
+import type { TaskDto } from "../shared/api/schema"
 const seedTasks: TaskDto[] = [
   { id: 1, name: 'Set up project', description: 'Vite, React, TypeScript', status: 'done', priority: 'high', createdAt: '2026-10-01T09:00:00.000Z' },
   { id: 2, name: 'Design login page', description: 'Wireframe and styles', status: 'in_progress', priority: 'medium', createdAt: '2026-10-02T09:00:00.000Z', assignee: 'Asha' },
@@ -14,7 +14,7 @@ let nextId = seedTasks.length + 1;
 export const db = {
   all: (): TaskDto[] => [...tasks],
 
-  create: (input: NewTaskDto): TaskDto => {
+  create: (input: NewTaskInput): TaskDto => {
     const task: TaskDto = {
       ...input,
       description: input.description ?? '',
@@ -27,7 +27,7 @@ export const db = {
     return task;
   },
 
-  update: (id: number, patch: TaskPatchDto): TaskDto | undefined => {
+  update: (id: number, patch: TaskChanges): TaskDto | undefined => {
     const existing = tasks.find((task) => task.id === id);
     if (!existing) return undefined;
     const updated = { ...existing, ...patch };

@@ -1,6 +1,6 @@
 import { delay, http, HttpResponse } from 'msw';
-import type { NewTaskDto, TaskPatchDto } from '../shared/api/types';
-import type { TaskStatus } from '../features/tasks/model';
+import type { NewTaskInput } from '../features/tasks/model';
+import type { TaskChanges, TaskStatus } from '../features/tasks/model';
 import { db } from './db';
 
 function simulatedFailure(request: Request): Response | null {
@@ -39,12 +39,12 @@ export const handlers = [
     const failure = simulatedFailure(request);
     if (failure) return failure;
 
-    const body = (await request.json()) as Partial<NewTaskDto>;
+    const body = (await request.json()) as Partial<NewTaskInput>;
     if (!body.name || body.name.trim() === '') {
       return HttpResponse.json({ message: 'Name is required' }, { status: 400 });
     }
 
-    const created = db.create({ ...body, name: body.name.trim() } as NewTaskDto);
+    const created = db.create({ ...body, name: body.name.trim() } as NewTaskInput);
     return HttpResponse.json(created, { status: 201 });
   }),
 
@@ -53,7 +53,7 @@ export const handlers = [
     const failure = simulatedFailure(request);
     if (failure) return failure;
 
-    const patch = (await request.json()) as TaskPatchDto;
+    const patch = (await request.json()) as TaskChanges;
     const updated = db.update(Number(params.id), patch);
     if (!updated) {
       return HttpResponse.json({ message: 'Task not found' }, { status: 404 });

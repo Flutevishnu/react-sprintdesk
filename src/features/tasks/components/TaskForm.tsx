@@ -1,8 +1,25 @@
-import type { Task, Priority, TaskStatus } from "../model";
-import { useId, useState, type SubmitEvent } from "react";
+import  { type Task, PRIORITIES, STATUSES } from "../model";
+import { useId } from "react";
+import * as z from 'zod';
+import { useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
 
 
-export type  TaskFormValues = Omit<Task, "id" | "createdAt">;
+const NAME_MIN = 3;
+const NAME_MAX = 100;
+
+const taskFormSchema = z.object({
+    name: z
+      .string()
+      .trim()
+      .min(NAME_MIN, `Title must be at least ${NAME_MIN} characters`)
+      .max(NAME_MAX, `Title must be at most ${NAME_MAX} characters`),
+    description: z.string(),
+    priority: z.enum(PRIORITIES),
+    status: z.enum(STATUSES),
+});
+
+export type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 interface TaskFormProps {
     task?: Task,
@@ -11,9 +28,8 @@ interface TaskFormProps {
     onSubmit: (values: TaskFormValues) => void,
     onCancel?: () => void;
 }
+  
 
-const NAME_MIN = 3;
-const NAME_MAX = 100;
 
 function getInitialValues(task?: Task) : TaskFormValues {
     if(!task) {
@@ -22,19 +38,13 @@ function getInitialValues(task?: Task) : TaskFormValues {
 
     return {
         name: task.name,
-        description: task.description,
+        description: task.description ?? "  ",
         priority: task.priority,
         status: task.status,
     };
 }
 
 
-function validateName(name: string) : string | null {
-    const length = name.trim().length;
-    if (length < NAME_MIN) return `Title must be at least ${NAME_MIN} characters`;
-    if (length > NAME_MAX) return `Title must be at most ${NAME_MAX} characters`;
-    return null;
-}
 export function TaskForm(
     {task, isSubmitting=false, error, onSubmit, onCancel} : TaskFormProps
 ) {
@@ -42,66 +52,51 @@ export function TaskForm(
     const isEditmode = task !== undefined;
     const id = useId();
 
-    const [values, setValues] = useState<TaskFormValues>(() => getInitialValues(task));
-    const [nameTouched, setNameTouched] = useState(false);  
-    const [submitAttempted, setsubmitAttempted] = useState<boolean>(false);
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+      } = useForm<TaskFormValues>({
+        resolver: zodResolver(taskFormSchema),
+        defaultValues: getInitialValues(task),
+        mode: 'onTouched',
+      });
 
+    const submit = handleSubmit((values) => {
+        if(isSubmitting) return;
+        onSubmit(values);
+    })
 
-    const nameError = validateName(values.name);
-    const showNameError = nameError !== null && (nameTouched || submitAttempted);
+      
+    const nameError = errors.name?.message;
 
-    const reset = () => {
-        setValues(getInitialValues(task));
-        setNameTouched(false);
-        setsubmitAttempted(false);
-    }
-
-    const updateField = <K extends keyof TaskFormValues>(field: K, value: TaskFormValues[K]) : void => {
-        setValues((current) => ({...current, [field]: value}))
-    }
-
-    const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setsubmitAttempted(true);
-        if (isSubmitting || nameError !== null) return;
-        onSubmit({...values, name:values.name.trim()});
-
-    }
-
-
-    const priority = ["low", "medium", "high"];
-    const status = ["todo", "in_progress", "done"];
 
     return (
         <>
-            <form onSubmit={handleSubmit} noValidate aria-label={isEditmode ? "Edit Task" : "Create Task"}>
+            <form onSubmit={submit} noValidate aria-label={isEditmode ? "Edit Task" : "Create Task"}>
                 <h2>{task ?  "Edit task" : "Add a task"}</h2>
                 <div>
                     <label htmlFor={`${id}-name`}>Title</label>
                     <input 
                         id={`${id}-name`}
                         type="text" 
-                        value={values.name}
-                        onChange={(e) => updateField("name", e.target.value) } 
-                        onBlur={() => setNameTouched(true)}
-                        aria-invalid={showNameError}
-                        aria-describedby={showNameError ? `${id}-name-error`: undefined}
+                        {...register('name')}
+                        aria-invalid={nameError !== undefined}
+                        aria-describedby={nameError ? `${id}-name-error` : undefined}
                     />
-                    {
-                        showNameError && (
-                            <p id={`${id}-name-error`} role="alert">
-                                {nameError}
-                            </p>
-                        )
-                    }
+                    {nameError && (
+                        <p id={`${id}-name-error`} role="alert">
+                            {nameError}
+                        </p>
+                    )}
                 </div>
                 
                 <div>
                     <label htmlFor={`${id}-description`}>Description</label>
                     <textarea 
                         id={`${id}-description`}
-                        value={values.description}
-                        onChange={(e) => updateField("description", e.target.value)}
+                        {...register("description")}
                     >
                     </textarea>
                 </div>
@@ -110,10 +105,9 @@ export function TaskForm(
                     <label htmlFor={`${id}-priority`}>Priority</label>
                     <select 
                         id={`${id}-priority`}
-                        value={values.priority}
-                        onChange={(e) => updateField("priority", e.target.value as Priority)}
+                        {...register("priority")}
                     >
-                        {priority.map((p) => (
+                        {PRIORITIES.map((p) => (
                             <option key={p} value={p}>{p}</option>
                         ))}
                     </select>
@@ -123,10 +117,9 @@ export function TaskForm(
                     <label htmlFor={`${id}-status`}>Status</label>
                     <select 
                         id={`${id}-status`}
-                        value={values.status}
-                        onChange={(e) => updateField('status', e.target.value as TaskStatus)}
+                        {...register("status")}
                     >
-                        {status.map((s) => (
+                        {STATUSES.map((s) => (
                             <option key={s} value={s}>{s}</option>
                         ))}
                     </select>
@@ -134,7 +127,7 @@ export function TaskForm(
 
 
                 <button type="submit" disabled={isSubmitting}>{isSubmitting? "Saving..." : isEditmode ? "Save changes" : "Add task"}</button>
-                <button type="button" onClick={reset}>Reset</button>
+                <button type="button" onClick={() => reset(getInitialValues(task))}>Reset</button>
 
                 {onCancel && (<button type="button" onClick={onCancel}>Cancel</button>)}
                 {error && <p role="alert">{error}</p>}

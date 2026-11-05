@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Task } from '../model';
@@ -107,8 +107,21 @@ describe('TaskForm: create mode', () => {
     fireEvent.submit(screen.getByRole('form', { name: 'Create Task' }));
     expect(onSubmit).not.toHaveBeenCalled();
 
-
   })
+
+  it('links the error to the input with aria-describedby', async () => {
+    const user = userEvent.setup();
+    render(<TaskForm onSubmit={vi.fn()} />);
+  
+    await user.click(screen.getByRole('button', { name: 'Add task' }));
+  
+    const input = screen.getByLabelText('Title');
+    const message = await screen.findByText('Title must be at least 3 characters');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription(message.textContent ?? '');
+  });
+  
+  
 });
 
 describe('TaskForm: edit mode', () => {

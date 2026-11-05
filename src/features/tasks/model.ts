@@ -14,7 +14,7 @@ export interface Task {
     assignee? : string
 }
 
-export type NewTaskInput = Omit<Task, "id" | "status" | "createdAt">;
+export type NewTaskInput = Omit<Task, "id" | "createdAt">;
 
 export type TaskChanges = Partial<Omit<Task, "id" | "createdAt">>;
 

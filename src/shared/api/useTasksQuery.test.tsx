@@ -85,4 +85,16 @@ describe('useTasksQuery', () => {
     expect(result.current.error).toBeInstanceOf(ApiError);
     expect(result.current.error).toMatchObject({ status: 500, message: 'Boom' });
   });
+
+
+  it('reports an error when the server sends data of the wrong shape', async () => {
+    server.use(
+      rest.get('/api/tasks', () => HttpResponse.json([{ id: 'x' }])),
+    );
+  
+    const { result } = setup();
+  
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error?.message).toMatch(/Invalid API response/);
+  });
 });

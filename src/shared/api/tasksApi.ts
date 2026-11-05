@@ -1,13 +1,11 @@
 import type { Task, TaskChanges, TaskStatus, NewTaskInput } from '../../features/tasks/model';
 import { http } from './http';
-import type { TaskDto } from './types';
+import { ZfetchTask, ZTask, type TaskDto, parseResponse } from "./schema";
 
 export interface TaskFilters {
   status?: TaskStatus;
   q?: string;
 }
-
-export type CreateTaskInput = NewTaskInput & {status? : TaskStatus}
 
 export const toTask = (dto: TaskDto): Task => ({
   ...dto,
@@ -26,18 +24,21 @@ export async function fetchTasks(
   filters: TaskFilters,
   signal?: AbortSignal,
 ): Promise<Task[]> {
-  const dtos = await http.get<TaskDto[]>(buildTasksUrl(filters), signal);
-  return dtos.map(toTask);
+  const dtos = await http.get<unknown>(buildTasksUrl(filters), signal);
+
+  return parseResponse(ZfetchTask, dtos).map(toTask);
 }
 
-export async function createTask(input: CreateTaskInput) : Promise<Task> {
-  const dto = await http.post<TaskDto>('/api/tasks', input);
-  return toTask(dto);
+export async function createTask(input: NewTaskInput) : Promise<Task> {
+  const dto = await http.post<unknown>('/api/tasks', input);
+
+  return toTask(parseResponse(ZTask, dto))
 }
 
 export async function updateTask(id: number, changes: TaskChanges) : Promise<Task> {
-  const dto = await http.patch<TaskDto>(`/api/tasks/${id}`, changes);
-  return toTask(dto);
+  const dto = await http.patch<unknown>(`/api/tasks/${id}`, changes);
+
+  return toTask(parseResponse(ZTask, dto))
 } 
 
 export async function deleteTask(id: number): Promise<void> {
