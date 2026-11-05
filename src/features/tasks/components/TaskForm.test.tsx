@@ -104,7 +104,8 @@ describe('TaskForm: create mode', () => {
 
     await user.type(screen.getByLabelText('Title'), 'Deploy app');
     expect(screen.getByRole('button', { name: 'Saving...' })).toBeDisabled();
-    fireEvent.submit(screen.getByRole('form', { name: 'Create Task' }));
+    await user.click(screen.getByRole('button', { name: 'Saving...' }));
+    await user.click(screen.getByRole('button', { name: 'Create Task' }));
     expect(onSubmit).not.toHaveBeenCalled();
 
   })

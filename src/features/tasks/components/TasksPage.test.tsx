@@ -4,6 +4,7 @@ import { http as rest, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { server } from '../../../mocks/server';
 import { TasksPage } from './TasksPage';
+import userEvent from '@testing-library/user-event';
 
 function renderPage() {
   const queryClient = new QueryClient({
@@ -68,8 +69,11 @@ describe('TasksPage', () => {
     renderPage();
     await screen.findByText('Set up project');
 
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Write docs' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Add task' }));
+
+    const user = userEvent.setup()
+    await user.type(screen.getByLabelText("Title"), "Write docs");
+    await user.click(screen.getByRole('button', {name: 'Add task'}));
+
 
     expect(await screen.findByText('Write docs')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue(''));
@@ -87,11 +91,13 @@ describe('TasksPage', () => {
     renderPage();
     await screen.findByText('Set up project');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit Set up project' }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Edit Set up project' }));
     expect(screen.getByRole('heading', { name: 'Edit task' })).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Renamed task' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await user.clear(screen.getByLabelText('Title'));
+    await user.type(screen.getByLabelText('Title'), 'Renamed task');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
     expect(await screen.findByText('Renamed task')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Add a task' })).toBeInTheDocument();
