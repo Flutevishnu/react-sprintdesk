@@ -1,5 +1,5 @@
-import type { Task } from '../model';
-import { STATUS_LABELS, STATUSES } from '../../../lib/utils';
+import  { type Task, STATUSES } from '../model';
+import { STATUS_LABELS } from '../../../lib/utils';
 
 
 export function StatusCounts({ tasks }: { tasks: Task[] }) {

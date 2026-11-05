@@ -1,9 +1,8 @@
-import type { Priority, Task, TaskStatus } from './model';
+import  { type Priority, type Task, type TaskStatus, PRIORITIES, STATUSES} from './model';
 
 export const TASKS_STORAGE_KEY = 'sprintdesk.tasks';
 
-const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done'];
-const PRIORITIES: Priority[] = ['low', 'medium', 'high'];
+
 
 function parseTask(value: unknown): Task | null {
   if (typeof value !== 'object' || value === null) return null;

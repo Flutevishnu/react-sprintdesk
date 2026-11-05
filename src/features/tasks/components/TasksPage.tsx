@@ -7,15 +7,14 @@ import {
 } from '../../../shared/api/useTaskMutations';
 import type { TaskFilters } from '../../../shared/api/tasksApi';
 import { useTasksQuery } from '../../../shared/api/useTasksQuery';
-import type { Priority, TaskStatus } from '../model';
+import  { type Priority, type TaskStatus, STATUSES, PRIORITIES } from '../model';
 import { useTaskUrlFilters, type SortKey } from '../useTaskUrlFilters';
 import { viewTasks } from '../viewTasks';
 import { TaskForm, type TaskFormValues } from './TaskForm';
 import { useDebouncedValue } from '../../hooks/usedebouncedvalue';
-import { PRIORITIES, PRIORITY_LABELS, STATUSES, STATUS_LABELS } from '../../../lib/utils';
+import { PRIORITY_LABELS, STATUS_LABELS } from '../../../lib/utils';
 import { StatusCounts } from './StatusCounts';
 import { TaskList } from './TaskList';
-
 
 export function TasksPage() {
   const { filters, setFilters } = useTaskUrlFilters();

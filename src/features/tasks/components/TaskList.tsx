@@ -1,5 +1,5 @@
-import type { Task, TaskStatus } from '../model';
-import { PRIORITY_LABELS, STATUS_LABELS, STATUSES } from '../../../lib/utils';
+import  { type Task, type TaskStatus, STATUSES } from '../model';
+import { PRIORITY_LABELS, STATUS_LABELS } from '../../../lib/utils';
 
 interface TaskListProps {
   tasks: Task[];

@@ -1,5 +1,8 @@
-export type TaskStatus = "todo" | "in_progress" | "done";
-export type Priority = "low" | "medium" | "high";
+export const STATUSES = ['todo', 'in_progress', 'done'] as const;
+export type TaskStatus = (typeof STATUSES)[number];
+
+export const PRIORITIES = ['low', 'medium', 'high'] as const;
+export type Priority = (typeof PRIORITIES)[number];
 
 export interface Task {
     readonly id : number,

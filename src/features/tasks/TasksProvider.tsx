@@ -2,6 +2,7 @@ import { loadTasks, saveTasks } from './tasksStorage'; // Hour 6
 import  { type ReactNode, useEffect, useReducer} from "react";
 import type { Task, TaskAction } from './model';
 import { TasksContext, TasksDispatchContext } from './TasksContexts';
+import { assertNever } from '../../lib/utils';
 
 interface TasksProviderProps {
     initialTasks?: Task[];
@@ -38,7 +39,7 @@ export function TaskReducer(state: Task[], action: TaskAction) : Task[] {
 
         case "status_moved":{
             return state.map((task) =>
-                task.id == action.id ? {...task, status: action.status}: task
+                task.id === action.id ? {...task, status: action.status}: task
             );
         }
             
@@ -51,8 +52,7 @@ export function TaskReducer(state: Task[], action: TaskAction) : Task[] {
         }
 
         default:  {
-            const unhandled: never = action;
-            return unhandled;
+            return assertNever(action);
         }
     }
 }
