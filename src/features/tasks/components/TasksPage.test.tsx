@@ -113,4 +113,27 @@ describe('TasksPage', () => {
       expect(screen.queryByText('Set up project')).not.toBeInTheDocument(),
     );
   });
+
+  it('shows a server field error next to the Title input', async () => {
+    const user = userEvent.setup();
+    server.use(
+      rest.post('/api/tasks', () =>
+        HttpResponse.json(
+          { message: 'Validation failed', errors: { name: 'Some Error' } },
+          { status: 400 },
+        ),
+      ),
+    );
+    renderPage();
+    await screen.findByText('Set up project');
+  
+    await user.type(screen.getByRole('textbox', { name: 'Title' }), 'Set up project');
+    await user.click(screen.getByRole('button', { name: 'Add task' }));
+  
+    const message = await screen.findByText('Some Error');
+    expect(screen.getByRole('textbox', { name: 'Title' })).toHaveAccessibleDescription(
+      'Some Error',
+    );
+    expect(message).toBeInTheDocument();
+  });
 });

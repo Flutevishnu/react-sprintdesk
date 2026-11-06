@@ -2,6 +2,7 @@ import { delay, http, HttpResponse } from 'msw';
 import type { NewTaskInput } from '../features/tasks/model';
 import type { TaskChanges, TaskStatus } from '../features/tasks/model';
 import { db } from './db';
+import { taskFormSchema } from '../shared/api/schema';
 
 function simulatedFailure(request: Request): Response | null {
   const fail = new URL(request.url).searchParams.get('fail');
@@ -39,12 +40,18 @@ export const handlers = [
     const failure = simulatedFailure(request);
     if (failure) return failure;
 
-    const body = (await request.json()) as Partial<NewTaskInput>;
-    if (!body.name || body.name.trim() === '') {
-      return HttpResponse.json({ message: 'Name is required' }, { status: 400 });
+    const body = await request.json();
+    const parsed = taskFormSchema.pick({name: true}).safeParse(body);
+    if(!parsed.success){
+      const errors: Record<string, string> = {};
+      for (const issue of parsed.error.issues){
+        const field = String(issue.path[0] ?? 'form');
+        errors[field] ??= issue.message;
+      }
+      return HttpResponse.json({message: "Validation failed", errors}, { status: 400});
     }
 
-    const created = db.create({ ...body, name: body.name.trim() } as NewTaskInput);
+    const created = db.create({ ...(body as Partial<NewTaskInput>) , name: parsed.data.name.trim() } as NewTaskInput);
     return HttpResponse.json(created, { status: 201 });
   }),
 

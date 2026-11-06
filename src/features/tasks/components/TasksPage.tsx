@@ -15,6 +15,8 @@ import { useDebouncedValue } from '../../hooks/usedebouncedvalue';
 import { PRIORITY_LABELS, STATUS_LABELS } from '../../../lib/utils';
 import { StatusCounts } from './StatusCounts';
 import { TaskList } from './TaskList';
+import { ApiError } from '../../../shared/api/http';
+
 
 export function TasksPage() {
   const { filters, setFilters } = useTaskUrlFilters();
@@ -37,6 +39,10 @@ export function TasksPage() {
   const remove = useDeleteTask();
   const move = useMoveTaskStatus();
 
+  const createFieldErrors = create.error instanceof ApiError ? create.error.fieldErrors : undefined;
+  const updateFieldErrors = update.error instanceof ApiError ? update.error.fieldErrors : undefined;
+
+
 
   const handleEdit = useCallback((id: number) => setEditingId(id), []);
   const handleDelete = useCallback(
@@ -44,11 +50,11 @@ export function TasksPage() {
       remove.mutate(id);
       setEditingId((current) => (current === id ? null : current));
     },
-    [remove.mutate],
+    [remove],
   );
   const handleStatusChange = useCallback(
     (id: number, status: TaskStatus) => move.mutate({ id, status }),
-    [move.mutate],
+    [move],
   );
 
   const tasks = useMemo(() => viewTasks(list.data ?? [], filters), [list.data, filters]);
@@ -69,16 +75,18 @@ export function TasksPage() {
           key={editing.id}
           task={editing}
           isSubmitting={update.isPending}
-          error={update.error?.message}
+          error={updateFieldErrors ? null : update.error?.message}
           onSubmit={(values) => handleUpdate(editing.id, values)}
           onCancel={() => setEditingId(null)}
+          serverErrors={updateFieldErrors}
         />
       ) : (
         <TaskForm
           key={createFormKey}
           isSubmitting={create.isPending}
-          error={create.error?.message}
+          error={createFieldErrors ? null : create.error?.message}
           onSubmit={handleCreate}
+          serverErrors={createFieldErrors}
         />
       )}
 

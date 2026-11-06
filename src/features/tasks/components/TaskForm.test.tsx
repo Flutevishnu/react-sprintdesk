@@ -125,7 +125,7 @@ describe('TaskForm: create mode', () => {
   it('has no accessibility violations', async () => {
     const { container } = render(<TaskForm onSubmit={vi.fn()} />);
     const result = await axe(container);
-    // @ts-ignore
+    // @ts-expect-error ts is not recognising the toHaveNoViolations is present
     expect(result).toHaveNoViolations();
   });
 });

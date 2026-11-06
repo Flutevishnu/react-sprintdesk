@@ -1,30 +1,49 @@
 import { type RequestOptions } from "../../features/tasks/model";
 
+
+export type FieldErrors = Record<string, string>;
+
 export class ApiError extends Error {
     readonly status: number;
+    readonly fieldErrors?: FieldErrors;
 
-    constructor(status: number, message:string){
+    constructor(status: number, message:string, fieldErrors?: FieldErrors){
         super(message);
         this.name = "ApiError";
         this.status = status;
+        this.fieldErrors = fieldErrors;
     }
 }
 
 
-async function readErrorMessage(response: Response) : Promise<string> {
+interface ErrorBody {
+    message: string;
+    fieldErrors?: FieldErrors;
+}
+
+function isStringRecord(value: unknown): value is FieldErrors {
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        Object.values(value).every((v) => typeof v === 'string')
+    );
+}
+
+async function readErrorBody(response: Response): Promise<ErrorBody> {
     try {
-        const data: unknown = await response.json()
-        if (typeof data === 'object' && data !== null && 'message' in data && typeof data.message === 'string') {
-            return data.message
+        const data: unknown = await response.json();
+        if (typeof data === 'object' && data !== null) {
+            const message = 'message' in data && typeof data.message === 'string' ? data.message : undefined;
+            const fieldErrors = 'errors' in data && isStringRecord(data.errors) ? data.errors : undefined;
+            if (message !== undefined) return { message, fieldErrors };
         }
+    } catch {
+        // body was not JSON
     }
-    catch {
-        // Error
-    }
-
-    return response.statusText || `Request failed with status ${response.status}`;
+    return {
+        message: response.statusText || `Request failed with status ${response.status}`,
+    };
 }
-
 
 export async function request<T>(
     url: string,
@@ -40,7 +59,8 @@ export async function request<T>(
     });
 
     if (!response.ok) {
-        throw new ApiError(response.status, await readErrorMessage(response))
+        const { message, fieldErrors } = await readErrorBody(response);
+        throw new ApiError(response.status, message, fieldErrors);
     }
 
     if (response.status === 204) {

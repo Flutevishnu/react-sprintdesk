@@ -10,7 +10,6 @@ interface TaskRowProps {
 }
 
 export const TaskRow = memo(function TaskRow({ task, onEdit, onDelete, onStatusChange }: TaskRowProps) {
-    console.log('row', task.id)
   return (
     <li>
       <strong>{task.name}</strong> <small>({PRIORITY_LABELS[task.priority]})</small>

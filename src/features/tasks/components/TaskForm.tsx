@@ -2,21 +2,10 @@ import  { type Task, PRIORITIES, STATUSES } from "../model";
 import * as z from 'zod';
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId } from 'react';
+import type { FieldErrors } from "../../../shared/api/http";
+import { taskFormSchema } from "../../../shared/api/schema";
 
-const NAME_MIN = 3;
-const NAME_MAX = 100;
-
-const taskFormSchema = z.object({
-    name: z
-      .string()
-      .trim()
-      .min(NAME_MIN, `Title must be at least ${NAME_MIN} characters`)
-      .max(NAME_MAX, `Title must be at most ${NAME_MAX} characters`),
-    description: z.string(),
-    priority: z.enum(PRIORITIES),
-    status: z.enum(STATUSES),
-});
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
 
@@ -26,6 +15,7 @@ interface TaskFormProps {
     error? : string | null,
     onSubmit: (values: TaskFormValues) => void,
     onCancel?: () => void;
+    serverErrors?: FieldErrors
 }
   
 
@@ -37,7 +27,7 @@ function getInitialValues(task?: Task) : TaskFormValues {
 
     return {
         name: task.name,
-        description: task.description ?? "  ",
+        description: task.description ?? "",
         priority: task.priority,
         status: task.status,
     };
@@ -45,30 +35,42 @@ function getInitialValues(task?: Task) : TaskFormValues {
 
 
 export function TaskForm(
-    {task, isSubmitting=false, error, onSubmit, onCancel} : TaskFormProps
+    {task, isSubmitting=false, error, onSubmit, onCancel, serverErrors} : TaskFormProps
 ) {
 
     const isEditmode = task !== undefined;
     const id = useId();
 
 
-    useEffect(() => {
-        if (isEditmode) {
-            setFocus('name');
-        }
-    }, [])
+    
 
     const {
         register,
         handleSubmit,
         reset,
         formState: { errors },
-        setFocus
+        setFocus,
+        setError
       } = useForm<TaskFormValues>({
         resolver: zodResolver(taskFormSchema),
         defaultValues: getInitialValues(task),
         mode: 'onTouched',
-      });
+    });
+    
+    useEffect(() => {
+        if (isEditmode) {
+            setFocus('name');
+        }
+    }, [isEditmode, setFocus])
+
+    useEffect(() => {
+        if(!serverErrors) return;
+        for (const [field, message] of Object.entries(serverErrors)) {
+            if (field === 'name' || field === 'description' || field === 'priority' || field === 'status') {
+              setError(field, { type: 'server', message });
+            }
+        }
+    }, [serverErrors, setError])
 
     const submit = handleSubmit((values) => {
         if(isSubmitting) return;

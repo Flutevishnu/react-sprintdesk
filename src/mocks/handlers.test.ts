@@ -44,7 +44,7 @@ describe('MSW task handlers', () => {
   it('POST with an empty name answers 400', async () => {
     const error = await errorOf(http.post('/api/tasks', { name: '   ' }));
     expect(error).toBeInstanceOf(ApiError);
-    expect(error).toMatchObject({ status: 400, message: 'Name is required' });
+    expect(error).toMatchObject({ status: 400, message: 'Validation failed' });
   });
 
   it('PATCH changes only the given fields', async () => {
@@ -82,5 +82,14 @@ describe('MSW task handlers', () => {
   it('?fail=503 also works on POST', async () => {
     const error = await errorOf(http.post('/api/tasks?fail=503', { name: 'x' }));
     expect(error).toMatchObject({ status: 503 });
+  });
+
+  it('POST with an invalid name answers 400 with a field error', async () => {
+    const error = await errorOf(http.post('/api/tasks', { name: 'ab' }));
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({
+      status: 400,
+      fieldErrors: { name: 'Title must be at least 3 characters' },
+    });
   });
 });

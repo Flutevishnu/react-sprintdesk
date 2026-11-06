@@ -76,4 +76,17 @@ describe('http client', () => {
     expect(error).toBeInstanceOf(TypeError);
     expect(error).not.toBeInstanceOf(ApiError);
   });
+
+  it('keeps field errors from a 400 response', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ message: 'Validation failed', errors: { name: 'Title is too short' } }, 400),
+    );
+    const error = await http.get('/api/tasks').catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({
+      status: 400,
+      message: 'Validation failed',
+      fieldErrors: { name: 'Title is too short' },
+    });
+  });
 });
