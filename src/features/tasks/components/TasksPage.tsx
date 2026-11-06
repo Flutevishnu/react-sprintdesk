@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   useCreateTask,
   useDeleteTask,
@@ -37,7 +37,21 @@ export function TasksPage() {
   const remove = useDeleteTask();
   const move = useMoveTaskStatus();
 
-  const tasks = viewTasks(list.data ?? [], filters);
+
+  const handleEdit = useCallback((id: number) => setEditingId(id), []);
+  const handleDelete = useCallback(
+    (id: number) => {
+      remove.mutate(id);
+      setEditingId((current) => (current === id ? null : current));
+    },
+    [remove.mutate],
+  );
+  const handleStatusChange = useCallback(
+    (id: number, status: TaskStatus) => move.mutate({ id, status }),
+    [move.mutate],
+  );
+
+  const tasks = useMemo(() => viewTasks(list.data ?? [], filters), [list.data, filters]);
   const editing = all.data?.find((t) => t.id === editingId);
 
   function handleCreate(values: TaskFormValues) {
@@ -125,12 +139,9 @@ export function TasksPage() {
       ) : (
         <TaskList
           tasks={tasks}
-          onEdit={setEditingId}
-          onDelete={(id) => {
-            remove.mutate(id);
-            if (id === editingId) setEditingId(null);
-          }}
-          onStatusChange={(id, status) => move.mutate({ id, status })}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
         />
       )}
     </main>

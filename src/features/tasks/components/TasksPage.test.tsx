@@ -80,11 +80,12 @@ describe('TasksPage', () => {
   });
 
   it('shows a validation message for a short title', async () => {
+    const user = userEvent.setup()
     renderPage();
     await screen.findByText('Set up project');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add task' }));
-    expect(screen.getByText('Title must be at least 3 characters')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Add task' }));
+    expect(await screen.findByText('Title must be at least 3 characters')).toBeInTheDocument();
   });
 
   it('edits a task', async () => {

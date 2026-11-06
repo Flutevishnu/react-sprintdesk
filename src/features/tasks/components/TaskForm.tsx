@@ -51,11 +51,10 @@ export function TaskForm(
     const isEditmode = task !== undefined;
     const id = useId();
 
-    const titleRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isEditmode) {
-            titleRef.current?.focus();
+            setFocus('name');
         }
     }, [])
 
@@ -64,6 +63,7 @@ export function TaskForm(
         handleSubmit,
         reset,
         formState: { errors },
+        setFocus
       } = useForm<TaskFormValues>({
         resolver: zodResolver(taskFormSchema),
         defaultValues: getInitialValues(task),
@@ -89,7 +89,6 @@ export function TaskForm(
                         id={`${id}-name`}
                         type="text" 
                         {...register('name')}
-                        ref={titleRef}
                         aria-invalid={nameError !== undefined}
                         aria-describedby={nameError ? `${id}-name-error` : undefined}
                     />

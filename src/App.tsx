@@ -1,11 +1,21 @@
+import { Profiler, type ProfilerOnRenderCallback  } from 'react';
 import { TasksPage } from './features/tasks/components/TasksPage';
 import { RouteErrorBoundary } from './shared/ui/RouteErrorBoundary';
 
+
+const onRender: ProfilerOnRenderCallback = (id, phase, actualDuration, baseDuration) => {
+  console.log(
+    `[perf] ${id} ${phase} actual=${actualDuration.toFixed(1)}ms base=${baseDuration.toFixed(1)}ms`,
+  );
+};
+
 function App() {
   return (
-    <RouteErrorBoundary>
-      <TasksPage />
-    </RouteErrorBoundary>
+    <Profiler id="App" onRender={onRender}> 
+      <RouteErrorBoundary>
+        <TasksPage />
+      </RouteErrorBoundary>
+    </Profiler>
   );
 }
 
