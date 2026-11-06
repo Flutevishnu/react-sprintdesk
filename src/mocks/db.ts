@@ -1,6 +1,7 @@
-import type { NewTaskDto, TaskDto, TaskPatchDto } from '../shared/api/types';
-
-const seedTasks: TaskDto[] = [
+import type { TaskChanges, NewTaskInput } from '../features/tasks/model';
+import type { TaskDto } from "../shared/api/schema"
+import { seedTasks as largeSeed } from "./seedTasks"
+const smallSeed: TaskDto[] = [
   { id: 1, name: 'Set up project', description: 'Vite, React, TypeScript', status: 'done', priority: 'high', createdAt: '2026-10-01T09:00:00.000Z' },
   { id: 2, name: 'Design login page', description: 'Wireframe and styles', status: 'in_progress', priority: 'medium', createdAt: '2026-10-02T09:00:00.000Z', assignee: 'Asha' },
   { id: 3, name: 'Write API docs', description: 'Document the endpoints', status: 'todo', priority: 'low', createdAt: '2026-10-03T09:00:00.000Z' },
@@ -8,13 +9,15 @@ const seedTasks: TaskDto[] = [
   { id: 5, name: 'Plan sprint demo', description: 'Prepare the slides', status: 'todo', priority: 'medium', createdAt: '2026-10-05T09:00:00.000Z' },
 ];
 
-let tasks: TaskDto[] = seedTasks.map((task) => ({ ...task }));
-let nextId = seedTasks.length + 1;
+const initial = import.meta.env.MODE === 'test' ? smallSeed : largeSeed
+
+let tasks: TaskDto[] = initial.map((task) => ({ ...task }));
+let nextId = initial.length + 1;
 
 export const db = {
   all: (): TaskDto[] => [...tasks],
 
-  create: (input: NewTaskDto): TaskDto => {
+  create: (input: NewTaskInput): TaskDto => {
     const task: TaskDto = {
       ...input,
       description: input.description ?? '',
@@ -27,7 +30,7 @@ export const db = {
     return task;
   },
 
-  update: (id: number, patch: TaskPatchDto): TaskDto | undefined => {
+  update: (id: number, patch: TaskChanges): TaskDto | undefined => {
     const existing = tasks.find((task) => task.id === id);
     if (!existing) return undefined;
     const updated = { ...existing, ...patch };
@@ -42,7 +45,7 @@ export const db = {
   },
 
   reset: (): void => {
-    tasks = seedTasks.map((task) => ({ ...task }));
-    nextId = seedTasks.length + 1;
+    tasks = initial.map((task) => ({ ...task }));
+    nextId = initial.length + 1;
   },
 };

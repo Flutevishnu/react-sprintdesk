@@ -85,4 +85,21 @@ describe('useTasksQuery', () => {
     expect(result.current.error).toBeInstanceOf(ApiError);
     expect(result.current.error).toMatchObject({ status: 500, message: 'Boom' });
   });
+
+
+  it('skips a malformed item and still succeeds', async () => {
+    server.use(rest.get('/api/tasks', () => HttpResponse.json([{ id: 'x' }])));
+    const { result } = setup();
+  
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([]);
+  });
+  
+  it('reports an error when the payload is not a list', async () => {
+    server.use(rest.get('/api/tasks', () => HttpResponse.json({ oops: true })));
+    const { result } = setup();
+  
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error?.message).toMatch(/Invalid API response/);
+  });
 });

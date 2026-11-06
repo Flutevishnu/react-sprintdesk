@@ -41,8 +41,6 @@ export const newTask: Task = {
   };
 
 
-export const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done'];
-export const PRIORITIES: Priority[] = ['low', 'medium', 'high'];
 
 export const STATUS_LABELS: Record<TaskStatus, string> = {
     todo: 'To do',
@@ -57,5 +55,8 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
 };
   
 
+export function assertNever(value: never): never {
+  throw new Error(`Unhandled case: ${JSON.stringify(value)}`);
+}
 
   

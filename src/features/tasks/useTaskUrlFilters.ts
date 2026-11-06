@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import type { Priority, TaskStatus } from './model';
-
+import  { type Priority, type TaskStatus, STATUSES, PRIORITIES } from './model';
 export type SortKey = 'priority' | 'date';
 
 export interface UrlFilters {
@@ -10,8 +9,6 @@ export interface UrlFilters {
   sort: SortKey;
 }
 
-const STATUSES: readonly TaskStatus[] = ['todo', 'in_progress', 'done'];
-const PRIORITIES: readonly Priority[] = ['low', 'medium', 'high'];
 
 export function parseFilters(search: string): UrlFilters {
   const params = new URLSearchParams(search);

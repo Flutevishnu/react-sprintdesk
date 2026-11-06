@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { db } from '../../mocks/db';
 import { server } from '../../mocks/server';
-import type { TaskPatchDto } from './types';
 import {
   useCreateTask,
   useDeleteTask,
@@ -13,6 +12,7 @@ import {
   useUpdateTask,
 } from './useTaskMutations';
 import { useTasksQuery } from './useTasksQuery';
+import type { TaskChanges } from '../../features/tasks/model';
 
 function setup() {
   const queryClient = new QueryClient({
@@ -49,7 +49,7 @@ async function loaded() {
 describe('task mutations', () => {
   it('create adds a task and the list refetches', async () => {
     const hook = await loaded();
-    act(() => hook.result.current.create.mutate({ name: 'New task', priority: 'low' }));
+    act(() => hook.result.current.create.mutate({ name: 'New task', priority: 'low', status: "todo" }));
     await waitFor(() => expect(hook.result.current.tasks.data).toHaveLength(6));
   });
 
@@ -75,7 +75,7 @@ describe('task mutations', () => {
       }),
     );
     const hook = await loaded();
-    act(() => hook.result.current.create.mutate({ name: 'A', priority: 'low' }));
+    act(() => hook.result.current.create.mutate({ name: 'A', priority: 'low', status: "todo" }));
     await waitFor(() => expect(hook.result.current.create.isPending).toBe(true));
     await waitFor(() => expect(hook.result.current.create.isError).toBe(true));
   });
@@ -83,7 +83,7 @@ describe('task mutations', () => {
   it('status change is optimistic: the UI updates before the server answers', async () => {
     server.use(
       rest.patch('/api/tasks/:id', async ({ request, params }) => {
-        const patch = (await request.json()) as TaskPatchDto;
+        const patch = (await request.json()) as TaskChanges;
         await delay(300);
         return HttpResponse.json(db.update(Number(params.id), patch));
       }),

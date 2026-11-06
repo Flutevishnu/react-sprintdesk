@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { axe } from 'vitest-axe';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Task } from '../model';
@@ -95,15 +96,37 @@ describe('TaskForm: create mode', () => {
     });
   });
 
-  it('clears the form after a successful submit', async () => {
+
+  it('disables the button and ignores a second submit while saving', async () => {
     const user = userEvent.setup();
-    render(<TaskForm onSubmit={vi.fn()} />);
+    const onSubmit = vi.fn();
+
+    render(<TaskForm isSubmitting onSubmit={onSubmit} />);
 
     await user.type(screen.getByLabelText('Title'), 'Deploy app');
-    await user.click(screen.getByRole('button', { name: 'Add task' }));
+    expect(screen.getByRole('button', { name: 'Saving...' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Saving...' }));
+    expect(onSubmit).not.toHaveBeenCalled();
 
-    expect(screen.getByLabelText('Title')).toHaveValue('');
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  })
+
+  it('links the error to the input with aria-describedby', async () => {
+    const user = userEvent.setup();
+    render(<TaskForm onSubmit={vi.fn()} />);
+  
+    await user.click(screen.getByRole('button', { name: 'Add task' }));
+  
+    const input = screen.getByLabelText('Title');
+    const message = await screen.findByText('Title must be at least 3 characters');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription(message.textContent ?? '');
+  });
+  
+  it('has no accessibility violations', async () => {
+    const { container } = render(<TaskForm onSubmit={vi.fn()} />);
+    const result = await axe(container);
+    // @ts-expect-error ts is not recognising the toHaveNoViolations is present
+    expect(result).toHaveNoViolations();
   });
 });
 

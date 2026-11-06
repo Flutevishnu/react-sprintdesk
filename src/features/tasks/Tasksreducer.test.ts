@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Task, TaskAction } from './model';
 import { TaskReducer} from './TasksProvider';
-import { makeTasks, newTask } from '../../lib/utils';
+import { makeTasks, newTask, assertNever } from '../../lib/utils';
 
 
 describe('TaskReducer: added', () => {
@@ -196,5 +196,29 @@ describe('tasksReducer: does not mutate its input', () => {
 
 
 
+function describeAction(action: TaskAction): string {
+  switch (action.type) {
+    case 'added':
+      return 'added';
+    case 'updated':
+      return 'updated';
+    case 'deleted':
+      return 'deleted';
+    case 'status_moved':
+      return 'status_moved';
+    default:
+      // @ts-expect-error 'toggled' is not handled, so action is not never
+      return assertNever(action);
+  }
+}
 
+describe('exhaustive checks', () => {
+  it('describes a handled action', () => {
+    expect(describeAction({ type: 'deleted', id: 1 })).toBe('deleted');
+  });
+
+  it('throws on an action type the reducer does not know', () => {
+    expect(() => TaskReducer([], { type: 'nope' } as never)).toThrow();
+  });
+});
 
