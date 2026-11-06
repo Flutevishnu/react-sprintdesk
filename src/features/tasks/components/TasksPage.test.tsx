@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { http as rest, HttpResponse } from 'msw';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { server } from '../../../mocks/server';
 import { TasksPage } from './TasksPage';
 import userEvent from '@testing-library/user-event';
-
+import { RouteErrorBoundary } from '../../../shared/ui/RouteErrorBoundary';
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -135,5 +135,48 @@ describe('TasksPage', () => {
       'Some Error',
     );
     expect(message).toBeInTheDocument();
+  });
+
+
+  it('still shows valid tasks when the server sends a malformed one', async () => {
+    server.use(
+      rest.get('/api/tasks', () =>
+        HttpResponse.json([
+          { id: 1, name: 'Valid task', status: 'todo', priority: 'low', createdAt: '2026-10-01T09:00:00.000Z' },
+          { id: 2, name: 123 },
+        ]),
+      ),
+    );
+    renderPage();
+  
+    expect(await screen.findByText('Valid task')).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Tasks' })).getAllByRole('listitem')).toHaveLength(1);
+  });
+
+  it('shows each task once when the server sends duplicate ids', async () => {
+    const task = { id: 1, name: 'Only once', status: 'todo', priority: 'low', createdAt: '2026-10-01T09:00:00.000Z' };
+    server.use(rest.get('/api/tasks', () => HttpResponse.json([task, task])));
+    renderPage();
+  
+    expect(await screen.findByText('Only once')).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Tasks' })).getAllByRole('listitem')).toHaveLength(1);
+  });
+
+  it('shows the error fallback when the payload is not a list', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    server.use(rest.get('/api/tasks', () => HttpResponse.json({ oops: true })));
+  
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RouteErrorBoundary>
+          <TasksPage />
+        </RouteErrorBoundary>
+      </QueryClientProvider>,
+    );
+  
+    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid API response');
   });
 });
