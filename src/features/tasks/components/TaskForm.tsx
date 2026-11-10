@@ -86,7 +86,7 @@ export function TaskForm(
             <form onSubmit={submit} noValidate aria-label={isEditmode ? "Edit Task" : "Create Task"}>
                 <h2>{task ?  "Edit task" : "Add a task"}</h2>
                 <div>
-                    <label htmlFor={`${id}-name`}>Title</label>
+                    <label htmlFor={`${id}-name`}>Task Title</label>
                     <input 
                         id={`${id}-name`}
                         type="text" 
@@ -100,6 +100,7 @@ export function TaskForm(
                         </p>
                     )}
                 </div>
+                <input {...register('due_date')} type="date"/>
                 
                 <div>
                     <label htmlFor={`${id}-description`}>Description</label>
