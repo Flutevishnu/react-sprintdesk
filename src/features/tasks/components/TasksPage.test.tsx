@@ -71,12 +71,12 @@ describe('TasksPage', () => {
 
 
     const user = userEvent.setup()
-    await user.type(screen.getByLabelText("Title"), "Write docs");
+    await user.type(screen.getByLabelText("Task Title (required)"), "Write docs");
     await user.click(screen.getByRole('button', {name: 'Add task'}));
 
 
     expect(await screen.findByText('Write docs')).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue(''));
+    await waitFor(() => expect(screen.getByLabelText('Task Title (required)')).toHaveValue(''));
   });
 
   it('shows a validation message for a short title', async () => {
@@ -96,8 +96,8 @@ describe('TasksPage', () => {
     await user.click(screen.getByRole('button', { name: 'Edit Set up project' }));
     expect(screen.getByRole('heading', { name: 'Edit task' })).toBeInTheDocument();
 
-    await user.clear(screen.getByLabelText('Title'));
-    await user.type(screen.getByLabelText('Title'), 'Renamed task');
+    await user.clear(screen.getByLabelText('Task Title (required)'));
+    await user.type(screen.getByLabelText('Task Title (required)'), 'Renamed task');
     await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
     expect(await screen.findByText('Renamed task')).toBeInTheDocument();
@@ -127,13 +127,12 @@ describe('TasksPage', () => {
     renderPage();
     await screen.findByText('Set up project');
   
-    await user.type(screen.getByRole('textbox', { name: 'Title' }), 'Set up project');
+    await user.type(screen.getByRole('textbox', { name: 'Task Title (required)' }), 'Set up project');
     await user.click(screen.getByRole('button', { name: 'Add task' }));
   
     const message = await screen.findByText('Some Error');
-    expect(screen.getByRole('textbox', { name: 'Title' })).toHaveAccessibleDescription(
-      'Some Error',
-    );
+    const input = screen.getByRole('textbox', { name: 'Task Title (required)' });
+    expect(input).toHaveAccessibleDescription(/Some Error/);
     expect(message).toBeInTheDocument();
   });
 
