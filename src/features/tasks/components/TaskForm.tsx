@@ -73,10 +73,15 @@ export function TaskForm(
     }, [serverErrors, setError])
 
     const submit = handleSubmit((values) => {
-        if(isSubmitting) return;
-        onSubmit(values);
-    })
-
+        if (isSubmitting) return;
+      
+        const { due_date, ...rest } = values;
+      
+        onSubmit({
+          ...rest,
+          ...(due_date ? { due_date } : {}),
+        });
+      });
       
     const nameError = errors.name?.message;
 
@@ -86,21 +91,23 @@ export function TaskForm(
             <form onSubmit={submit} noValidate aria-label={isEditmode ? "Edit Task" : "Create Task"}>
                 <h2>{task ?  "Edit task" : "Add a task"}</h2>
                 <div>
-                    <label htmlFor={`${id}-name`}>Task Title</label>
+                    <label htmlFor={`${id}-name`}>Task Title (required)</label>
                     <input 
                         id={`${id}-name`}
                         type="text" 
                         {...register('name')}
                         aria-invalid={nameError !== undefined}
-                        aria-describedby={nameError ? `${id}-name-error` : undefined}
+                        aria-describedby={nameError ? `${id}-name-error ${id}-name-hint` : `${id}-name-hint`}
                     />
+                    <p id={`${id}-name-hint`}>3–100 characters</p>
                     {nameError && (
                         <p id={`${id}-name-error`} role="alert">
                             {nameError}
                         </p>
                     )}
                 </div>
-                <input {...register('due_date')} type="date"/>
+                <label htmlFor={`${id}-due_date`}>Due Date</label>
+                <input id={`${id}-due_date`} {...register('due_date')} type="date"/>
                 
                 <div>
                     <label htmlFor={`${id}-description`}>Description</label>

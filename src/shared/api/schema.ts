@@ -23,7 +23,10 @@ export const taskFormSchema = z.object({
     description: z.string(),
     priority: z.enum(PRIORITIES),
     status: z.enum(STATUSES),
-    due_date: z.iso.datetime().optional()
+    due_date: z.union([
+      z.literal(''),
+      z.iso.date(),
+    ]).optional()
 });
 
 
