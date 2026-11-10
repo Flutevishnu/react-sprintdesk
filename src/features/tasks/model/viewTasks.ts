@@ -1,5 +1,5 @@
-import type { Priority, Task } from './model';
-import type { SortKey } from './useTaskUrlFilters';
+import type { Priority, Task } from './types';
+import type { SortKey } from './types';
 
 const RANK: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
 

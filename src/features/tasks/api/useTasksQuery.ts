@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchTasks, type TaskFilters } from './tasksApi';
-import { type Task } from '../../features/tasks/model';
+import { type Task } from '../model/types';
 const taskRoot = ['tasks'] as const;
 
 export const taskKeys = {

@@ -1,4 +1,4 @@
-import { type TaskDto } from "../shared/api/schema";
+import { type TaskDto } from "../features/tasks/api/schema";
 const taskTemplates = [
 { name: 'Set up project', description: 'Initialize project configuration and dependencies' },
 { name: 'Design login page', description: 'Create login page UI and responsive styles' },

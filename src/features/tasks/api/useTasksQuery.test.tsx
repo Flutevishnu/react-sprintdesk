@@ -3,8 +3,8 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { http as rest, HttpResponse } from 'msw';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
-import { server } from '../../mocks/server';
-import { ApiError } from './http';
+import { server } from '../../../mocks/server';
+import { ApiError } from '../../../shared/lib/http';
 import type { TaskFilters } from './tasksApi';
 import { useTasksQuery } from './useTasksQuery';
 

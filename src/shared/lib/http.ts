@@ -1,5 +1,11 @@
-import { type RequestOptions } from "../../features/tasks/model";
 
+
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+export interface RequestOptions {
+    method?: HttpMethod;
+    body?: unknown;
+    signal?: AbortSignal;
+}
 
 export type FieldErrors = Record<string, string>;
 

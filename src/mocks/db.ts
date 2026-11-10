@@ -1,5 +1,5 @@
-import type { TaskChanges, NewTaskInput } from '../features/tasks/model';
-import type { TaskDto } from "../shared/api/schema"
+import type { TaskChanges, NewTaskInput } from '../features/tasks/model/types';
+import type { TaskDto } from "../features/tasks/api/schema"
 import { seedTasks as largeSeed } from "./seedTasks"
 const smallSeed: TaskDto[] = [
   { id: 1, name: 'Set up project', description: 'Vite, React, TypeScript', status: 'done', priority: 'high', createdAt: '2026-10-01T09:00:00.000Z' },

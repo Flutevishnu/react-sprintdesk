@@ -1,6 +1,6 @@
 import { Profiler, type ProfilerOnRenderCallback  } from 'react';
-import { TasksPage } from './features/tasks/components/TasksPage';
-import { RouteErrorBoundary } from './shared/ui/RouteErrorBoundary';
+import TasksPage  from "../features/tasks";
+import { RouteErrorBoundary } from '../shared/ui/RouteErrorBoundary';
 
 
 const onRender: ProfilerOnRenderCallback = (id, phase, actualDuration, baseDuration) => {

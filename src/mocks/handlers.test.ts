@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ApiError, http } from '../shared/api/http';
-import type { TaskDto } from '../shared/api/schema';
+import { http, ApiError } from '../shared/lib/http';
+import type { TaskDto } from '../features/tasks/api/schema';
 
 const errorOf = (promise: Promise<unknown>) =>
   promise.catch((error: unknown) => error);
@@ -91,5 +91,10 @@ describe('MSW task handlers', () => {
       status: 400,
       fieldErrors: { name: 'Title must be at least 3 characters' },
     });
+  });
+
+  it('GET returns an empty list when nothing matches', async () => {
+    const tasks = await http.get<TaskDto[]>('/api/tasks?q=zzz');
+    expect(tasks).toEqual([]);
   });
 });

@@ -3,8 +3,8 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { delay, http as rest, HttpResponse } from 'msw';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
-import { db } from '../../mocks/db';
-import { server } from '../../mocks/server';
+import { db } from '../../../mocks/db';
+import { server } from '../../../mocks/server';
 import {
   useCreateTask,
   useDeleteTask,
@@ -12,7 +12,7 @@ import {
   useUpdateTask,
 } from './useTaskMutations';
 import { useTasksQuery } from './useTasksQuery';
-import type { TaskChanges } from '../../features/tasks/model';
+import type { TaskChanges } from '../model/types';
 
 function setup() {
   const queryClient = new QueryClient({

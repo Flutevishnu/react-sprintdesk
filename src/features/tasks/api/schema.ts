@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { STATUSES, PRIORITIES } from "../../features/tasks/model";
+import { STATUSES, PRIORITIES } from "../model/types";
 
 export const ZTask = z.object({
     id: z.number(),
@@ -25,7 +25,7 @@ export const taskFormSchema = z.object({
     status: z.enum(STATUSES),
 });
 
-
+export type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 export const ZfetchTask = z.array(ZTask);
 export type TaskDto = z.infer<typeof ZTask>;

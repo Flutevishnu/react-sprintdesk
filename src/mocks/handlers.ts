@@ -1,8 +1,8 @@
 import { delay, http, HttpResponse } from 'msw';
-import type { NewTaskInput } from '../features/tasks/model';
-import type { TaskChanges, TaskStatus } from '../features/tasks/model';
+import type { NewTaskInput } from '../features/tasks/model/types';
+import type { TaskChanges, TaskStatus } from '../features/tasks/model/types';
 import { db } from './db';
-import { taskFormSchema } from '../shared/api/schema';
+import { taskFormSchema } from '../features/tasks/api/schema';
 
 function simulatedFailure(request: Request): Response | null {
   const fail = new URL(request.url).searchParams.get('fail');

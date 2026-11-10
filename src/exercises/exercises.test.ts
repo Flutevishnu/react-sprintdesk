@@ -13,7 +13,7 @@ import {
     retry,
     countBy
  } from './exercises';
-import type {Task} from '../features/tasks/model';
+import type { Task } from '../features/tasks/model/types';
 
 describe("Testing the Group By", () => {
 

@@ -18,18 +18,19 @@ export type NewTaskInput = Omit<Task, "id" | "createdAt">;
 
 export type TaskChanges = Partial<Omit<Task, "id" | "createdAt">>;
 
-export type TaskAction = {type: "added", task: Task} 
-                        | { type: 'updated'; id: number; changes: TaskChanges } 
-                        | { type: 'deleted'; id: number } 
-                        | { type: 'status_moved'; id: number; status: TaskStatus }
-                        | { type: 'toggled'; id: number };
 
 
-type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+export const STATUS_LABELS: Record<TaskStatus, string> = {
+    todo: 'To do',
+    in_progress: 'In progress',
+    done: 'Done',
+};
 
+export const PRIORITY_LABELS: Record<Priority, string> = {
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+};
 
-export interface RequestOptions {
-    method?: HttpMethod;
-    body?: unknown;
-    signal?: AbortSignal;
-}
+export type SortKey = 'priority' | 'date';
+  

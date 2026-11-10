@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import  { type Priority, type TaskStatus, STATUSES, PRIORITIES } from './model';
-export type SortKey = 'priority' | 'date';
+import  { type Priority, type TaskStatus, STATUSES, PRIORITIES, type SortKey } from '../model/types';
+
 
 export interface UrlFilters {
   q: string;

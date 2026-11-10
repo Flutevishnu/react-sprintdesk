@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Priority, Task } from './model';
+import type { Priority, Task } from './types';
 import { viewTasks } from './viewTasks';
 
 const make = (id: number, priority: Priority, day: number): Task => ({

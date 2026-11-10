@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { http, isAbortError } from '../shared/api/http';
+import { http, isAbortError } from '../shared/lib/http';
 
 export interface Item {
   id: number;

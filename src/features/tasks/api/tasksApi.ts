@@ -1,5 +1,5 @@
-import type { Task, TaskChanges, TaskStatus, NewTaskInput } from '../../features/tasks/model';
-import { http } from './http';
+import type { Task, TaskChanges, TaskStatus, NewTaskInput } from '../model/types';
+import { http } from '../../../shared/lib/http';
 import { ZTask, type TaskDto, parseResponse } from "./schema";
 
 export interface TaskFilters {

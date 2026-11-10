@@ -4,18 +4,19 @@ import {
   useDeleteTask,
   useMoveTaskStatus,
   useUpdateTask,
-} from '../../../shared/api/useTaskMutations';
-import type { TaskFilters } from '../../../shared/api/tasksApi';
-import { useTasksQuery } from '../../../shared/api/useTasksQuery';
-import  { type Priority, type TaskStatus, STATUSES, PRIORITIES } from '../model';
-import { useTaskUrlFilters, type SortKey } from '../useTaskUrlFilters';
-import { viewTasks } from '../viewTasks';
-import { TaskForm, type TaskFormValues } from './TaskForm';
-import { useDebouncedValue } from '../../hooks/usedebouncedvalue';
-import { PRIORITY_LABELS, STATUS_LABELS } from '../../../lib/utils';
+} from '../api/useTaskMutations';
+import type { TaskFilters } from '../api/tasksApi';
+import { useTasksQuery } from '../api/useTasksQuery';
+import  { type Priority, type TaskStatus, STATUSES, PRIORITIES } from '../model/types';
+import { useTaskUrlFilters } from '../hooks/useTaskUrlFilters';
+import { viewTasks } from '../model/viewTasks';
+import { TaskForm } from './TaskForm';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { STATUS_LABELS, PRIORITY_LABELS, type SortKey } from '../model/types';
 import { StatusCounts } from './StatusCounts';
 import { TaskList } from './TaskList';
-import { ApiError } from '../../../shared/api/http';
+import { ApiError } from '../../../shared/lib/http';
+import type { TaskFormValues } from '../api/schema';
 
 
 export function TasksPage() {

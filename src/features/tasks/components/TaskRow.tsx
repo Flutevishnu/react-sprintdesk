@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import { type Task, type TaskStatus, STATUSES } from '../model';
-import { PRIORITY_LABELS, STATUS_LABELS } from '../../../lib/utils';
+import { type Task, type TaskStatus, STATUSES } from '../model/types';
+import { STATUS_LABELS, PRIORITY_LABELS } from '../model/types';
 
 interface TaskRowProps {
   task: Task;

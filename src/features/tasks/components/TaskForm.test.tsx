@@ -2,19 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import type { Task } from '../model';
 import { TaskForm } from './TaskForm';
+import { makeTask as buildTask } from '../testing/fixtures';
 
-function makeTask(): Task {
-  return {
-    id: 1,
-    name: 'Write report',
-    description: 'Quarterly report',
-    status: 'in_progress',
-    priority: 'high',
-    createdAt: new Date('2026-01-01T00:00:00Z'),
-  };
-}
+const makeTask = () => buildTask({ status: 'in_progress' });
 
 describe('TaskForm: create mode', () => {
   it('starts empty with default priority and status', () => {
