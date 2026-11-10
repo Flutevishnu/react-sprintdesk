@@ -86,14 +86,15 @@ export function TaskForm(
             <form onSubmit={submit} noValidate aria-label={isEditmode ? "Edit Task" : "Create Task"}>
                 <h2>{task ?  "Edit task" : "Add a task"}</h2>
                 <div>
-                    <label htmlFor={`${id}-name`}>Title</label>
+                    <label htmlFor={`${id}-name`}>Title (required)</label>
                     <input 
                         id={`${id}-name`}
                         type="text" 
                         {...register('name')}
                         aria-invalid={nameError !== undefined}
-                        aria-describedby={nameError ? `${id}-name-error` : undefined}
+                        aria-describedby={nameError ? `${id}-name-error ${id}-name-hint` : `${id}-name-hint`}
                     />
+                    <p id={`${id}-name-hint`}>3–100 characters</p>
                     {nameError && (
                         <p id={`${id}-name-error`} role="alert">
                             {nameError}

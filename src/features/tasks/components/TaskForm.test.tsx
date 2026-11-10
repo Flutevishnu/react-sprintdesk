@@ -128,6 +128,19 @@ describe('TaskForm: create mode', () => {
     // @ts-expect-error ts is not recognising the toHaveNoViolations is present
     expect(result).toHaveNoViolations();
   });
+
+  it("links the title field to the length hint", () => {
+    render(<TaskForm onSubmit={vi.fn()} />);
+  
+    const titleInput = screen.getByLabelText("Title (required)");
+    const hint = screen.getByText("3–100 characters");
+  
+    expect(hint).toBeInTheDocument();
+    expect(titleInput).toHaveAttribute(
+      "aria-describedby",
+      expect.stringContaining(hint.id)
+    );
+  });
 });
 
 describe('TaskForm: edit mode', () => {
