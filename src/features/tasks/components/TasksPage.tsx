@@ -148,7 +148,15 @@ export function TasksPage() {
       ) : all.data?.length === 0 ? (
         <p>No tasks yet. Add your first task above.</p>
       ) : tasks.length === 0 ? (
-        <p>No tasks match your filters</p>
+        <div>
+          <p>No tasks match your filters</p>
+          <button type='button' aria-label='Clear filter' onClick={() => {setFilters({
+            status: undefined, 
+            priority: undefined, 
+            sort: 'date',
+            q: undefined
+            })}}>Clear Filters</button>
+        </div>
       ) : (
         <TaskList
           tasks={tasks}
