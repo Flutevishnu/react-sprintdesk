@@ -30,7 +30,10 @@ export const handlers = [
     const tasks = db
       .all()
       .filter((task) => (status ? task.status === status : true))
-      .filter((task) => task.name.toLowerCase().includes(q));
+      .filter((task) => {
+        const text = `${task.name} ${task.description ?? ''}`.toLowerCase();
+        return text.includes(q);
+      });
 
     return HttpResponse.json(tasks);
   }),
