@@ -47,6 +47,19 @@ describe('MSW task handlers', () => {
     expect(error).toMatchObject({ status: 400, message: 'Validation failed' });
   });
 
+  it('Post with title more than 100 characters return 400', async () => {
+    const error = await errorOf(http.post('/api/tasks', { name: 'a'.repeat(101) }));
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 400, message: 'Validation failed' });
+  })
+
+  it('Post with description more than 1000 characters return 400', async () => {
+    const error = await errorOf(http.post('/api/tasks', { name: 'a'.repeat(3), description: 'a'.repeat(1001) }));
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 400, message: 'Validation failed' });
+  })
+
+
   it('PATCH changes only the given fields', async () => {
     const updated = await http.patch<TaskDto>('/api/tasks/1', {
       status: 'in_progress',
@@ -56,9 +69,21 @@ describe('MSW task handlers', () => {
   });
 
   it('PATCH on an unknown id answers 404', async () => {
-    const error = await errorOf(http.patch('/api/tasks/999', { name: 'x' }));
+    const error = await errorOf(http.patch('/api/tasks/999', { name: 'xabe' }));
     expect(error).toMatchObject({ status: 404, message: 'Task not found' });
   });
+
+  it('Patch with title more than 100 characters return 400', async () => {
+    const error = await errorOf(http.patch('/api/tasks/1', { name: 'a'.repeat(101) }));
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 400, message: 'Validation failed' });
+  })
+
+  it('Patch with description more than 1000 characters return 400', async () => {
+    const error = await errorOf(http.patch('/api/tasks/1', { name: 'a'.repeat(3), description: 'a'.repeat(1001) }));
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 400, message: 'Validation failed' });
+  })
 
   it('DELETE removes the task and answers 204', async () => {
     const result = await http.delete('/api/tasks/1');
@@ -97,4 +122,6 @@ describe('MSW task handlers', () => {
     const tasks = await http.get<TaskDto[]>('/api/tasks?q=zzz');
     expect(tasks).toEqual([]);
   });
+
+  
 });

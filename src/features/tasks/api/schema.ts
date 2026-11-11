@@ -13,17 +13,19 @@ export const ZTask = z.object({
 
 const NAME_MIN = 3;
 const NAME_MAX = 100;
-
+const DESCRIPTION_MAX = 1000;
 export const taskFormSchema = z.object({
     name: z
       .string()
       .trim()
       .min(NAME_MIN, `Title must be at least ${NAME_MIN} characters`)
       .max(NAME_MAX, `Title must be at most ${NAME_MAX} characters`),
-    description: z.string(),
+    description: z.string().trim().max(DESCRIPTION_MAX, `Description must be at most ${DESCRIPTION_MAX} characters`).optional(),
     priority: z.enum(PRIORITIES),
     status: z.enum(STATUSES),
 });
+
+export const taskPatchSchema = taskFormSchema.partial();
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
 

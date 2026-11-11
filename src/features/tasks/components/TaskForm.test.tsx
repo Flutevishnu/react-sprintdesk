@@ -46,6 +46,17 @@ describe('TaskForm: create mode', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('at most 100 characters');
   });
 
+  it('shows an error when the description is longer than 1000 characters', async () => {
+    const user = userEvent.setup();
+    render(<TaskForm onSubmit={vi.fn()} />);
+
+    await user.click(screen.getByLabelText('Description'));
+    await user.paste('a'.repeat(1001));
+    await user.tab();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('at most 1000 characters');
+  })
+
   it('shows no error for a valid title', async () => {
     const user = userEvent.setup();
     render(<TaskForm onSubmit={vi.fn()} />);

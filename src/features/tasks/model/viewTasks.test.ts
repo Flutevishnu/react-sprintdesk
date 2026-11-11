@@ -30,4 +30,31 @@ describe('viewTasks', () => {
     viewTasks(tasks, { sort: 'priority' });
     expect(tasks).toEqual(copy);
   });
+
+
+  it('keeps the original order for tasks with the same priority', () => {
+    const input = [make(1, 'high', 1), make(2, 'low', 2), make(3, 'high', 3)];
+
+    expect(viewTasks(input, { sort: 'priority' }).map((t) => t.id)).toEqual([1, 3, 2]);
+  });
+
+  it('works on a frozen array', () => {
+    const frozen = Object.freeze([...tasks]);
+
+    expect(() => viewTasks(frozen, { sort: 'date' })).not.toThrow();
+  });
+
+  it('returns an empty list when no task has the chosen priority', () => {
+    const input = [make(1, 'low', 1), make(2, 'medium', 2)];
+
+    expect(viewTasks(input, { priority: 'high', sort: 'date' })).toEqual([]);
+  });
+
+  it('applies the priority filter before sorting', () => {
+    const input = [make(1, 'high', 1), make(2, 'low', 2), make(3, 'high', 3)];
+
+    expect(
+      viewTasks(input, { priority: 'high', sort: 'date' }).map((t) => t.id),
+    ).toEqual([3, 1]);
+  });
 });

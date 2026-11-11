@@ -78,7 +78,7 @@ export function TaskForm(
 
       
     const nameError = errors.name?.message;
-
+    const descriptionError = errors.description?.message;
 
     return (
         <>
@@ -105,8 +105,15 @@ export function TaskForm(
                     <textarea 
                         id={`${id}-description`}
                         {...register("description")}
+                        aria-invalid={descriptionError !== undefined}
+                        aria-describedby={descriptionError ? `${id}-description-error` : undefined}
                     >
                     </textarea>
+                    {descriptionError && (
+                        <p id={`${id}-description-error`} role="alert">
+                            {descriptionError}
+                        </p>
+                    )}
                 </div>
 
                 <div>
