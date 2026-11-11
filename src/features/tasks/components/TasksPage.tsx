@@ -46,16 +46,20 @@ export function TasksPage() {
 
 
   const handleEdit = useCallback((id: number) => setEditingId(id), []);
+
+  const { mutate: removeTask } = remove;
+  const { mutate: moveStatus } = move;
+
   const handleDelete = useCallback(
     (id: number) => {
-      remove.mutate(id);
+      removeTask(id);
       setEditingId((current) => (current === id ? null : current));
     },
-    [remove],
+    [removeTask],
   );
   const handleStatusChange = useCallback(
-    (id: number, status: TaskStatus) => move.mutate({ id, status }),
-    [move],
+    (id: number, status: TaskStatus) => moveStatus({ id, status }),
+    [moveStatus],
   );
 
   const tasks = useMemo(() => viewTasks(list.data ?? [], filters), [list.data, filters]);

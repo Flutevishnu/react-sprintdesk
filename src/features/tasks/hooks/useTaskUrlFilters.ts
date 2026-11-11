@@ -18,7 +18,7 @@ export function parseFilters(search: string): UrlFilters {
     q: params.get('q') ?? '',
     status: STATUSES.find((s) => s === status),
     priority: PRIORITIES.find((p) => p === priority),
-    sort: params.get('sort') === 'date' ? 'date' : 'priority',
+    sort: params.get('sort') === 'priority' ? 'priority' : 'date',
   };
 }
 
@@ -27,7 +27,7 @@ function buildSearch(filters: UrlFilters): string {
   if (filters.q) params.set('q', filters.q);
   if (filters.status) params.set('status', filters.status);
   if (filters.priority) params.set('priority', filters.priority);
-  if (filters.sort !== 'priority') params.set('sort', filters.sort);
+  if (filters.sort !== 'date') params.set('sort', filters.sort);
   const text = params.toString();
   return text ? `?${text}` : '';
 }

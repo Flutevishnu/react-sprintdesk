@@ -20,13 +20,13 @@ function renderPage() {
 beforeEach(() => window.history.replaceState(null, '', '/'));
 
 describe('TasksPage', () => {
-  it('shows the server tasks sorted by priority with counts for all tasks', async () => {
+  it('shows the server tasks sorted by date with counts for all tasks', async () => {
     renderPage();
-    expect(await screen.findByText('Set up project')).toBeInTheDocument();
+    expect(await screen.findByText('Plan sprint demo')).toBeInTheDocument();
 
     const items = within(screen.getByRole('list', { name: 'Tasks' })).getAllByRole('listitem');
     expect(items).toHaveLength(5);
-    expect(items[0]).toHaveTextContent('Set up project');
+    expect(items[0]).toHaveTextContent('Plan sprint demo');
     expect(screen.getByText('To do: 2')).toBeInTheDocument();
     expect(screen.getByText('In progress: 2')).toBeInTheDocument();
     expect(screen.getByText('Done: 1')).toBeInTheDocument();

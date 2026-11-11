@@ -7,7 +7,7 @@ beforeEach(() => window.history.replaceState(null, '', '/'));
 describe('useTaskUrlFilters', () => {
   it('uses defaults when the URL has no filters', () => {
     const { result } = renderHook(() => useTaskUrlFilters());
-    expect(result.current.filters).toEqual({ q: '', sort: 'priority' });
+    expect(result.current.filters).toEqual({ q: '', sort: 'date' });
   });
 
   it('reads filters from the URL', () => {
@@ -21,20 +21,20 @@ describe('useTaskUrlFilters', () => {
     const { result } = renderHook(() => useTaskUrlFilters());
     expect(result.current.filters.status).toBeUndefined();
     expect(result.current.filters.priority).toBeUndefined();
-    expect(result.current.filters.sort).toBe('priority');
+    expect(result.current.filters.sort).toBe('date');
   });
 
   it('writes changes to the URL and updates the filters', () => {
     const { result } = renderHook(() => useTaskUrlFilters());
     act(() => result.current.setFilters({ status: 'done', sort: 'date' }));
-    expect(window.location.search).toBe('?status=done&sort=date');
+    expect(window.location.search).toBe('?status=done');
     expect(result.current.filters.status).toBe('done');
   });
 
   it('removes a param when the filter is cleared or back to default', () => {
-    window.history.replaceState(null, '', '/?status=done&sort=date');
+    window.history.replaceState(null, '', '/?status=done&sort=priority');
     const { result } = renderHook(() => useTaskUrlFilters());
-    act(() => result.current.setFilters({ status: undefined, sort: 'priority' }));
+    act(() => result.current.setFilters({ status: undefined, sort: 'date' }));
     expect(window.location.search).toBe('');
   });
 });
