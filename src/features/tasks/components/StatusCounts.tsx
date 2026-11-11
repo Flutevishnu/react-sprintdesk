@@ -10,6 +10,7 @@ export function StatusCounts({ tasks }: { tasks: Task[] }) {
           {STATUS_LABELS[status]}: {tasks.filter((task) => task.status === status).length}
         </li>
       ))}
+      <li>High Priority Tasks Not done: {tasks.filter((task) => task.priority === "high" && task.status !== 'done').length}</li>
     </ul>
   );
 }
