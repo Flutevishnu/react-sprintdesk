@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { http as rest, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { server } from '../../mocks/server';
-import { useTasksQuery } from '../api/useTasksQuery';
+import { useTasksQuery } from '../../features/tasks/api/useTasksQuery';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
 function TaskNames() {

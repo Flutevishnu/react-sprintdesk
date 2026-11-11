@@ -1,22 +1,23 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   useCreateTask,
   useDeleteTask,
   useMoveTaskStatus,
   useUpdateTask,
-} from '../../../shared/api/useTaskMutations';
-import type { TaskFilters } from '../../../shared/api/tasksApi';
-import { useTasksQuery } from '../../../shared/api/useTasksQuery';
-import  { type Priority, type TaskStatus, STATUSES, PRIORITIES } from '../model';
-import { useTaskUrlFilters, type SortKey } from '../useTaskUrlFilters';
-import { viewTasks } from '../viewTasks';
-import { TaskForm, type TaskFormValues } from './TaskForm';
-import { useDebouncedValue } from '../../hooks/usedebouncedvalue';
-import { PRIORITY_LABELS, STATUS_LABELS } from '../../../lib/utils';
+} from '../api/useTaskMutations';
+import type { TaskFilters } from '../api/tasksApi';
+import { useTasksQuery } from '../api/useTasksQuery';
+import  { type Priority, type TaskStatus, STATUSES, PRIORITIES } from '../model/types';
+import { useTaskUrlFilters } from '../hooks/useTaskUrlFilters';
+import { viewTasks } from '../model/viewTasks';
+import { TaskForm } from './TaskForm';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { STATUS_LABELS, PRIORITY_LABELS, type SortKey, type PendingAction, type Task} from '../model/types';
 import { StatusCounts } from './StatusCounts';
 import { TaskList } from './TaskList';
-import { ApiError } from '../../../shared/api/http';
-
+import { ApiError } from '../../../shared/lib/http';
+import type { TaskFormValues } from '../api/schema';
+import { ConfirmDialog } from './ConfirmDialog';
 
 export function TasksPage() {
   const { filters, setFilters } = useTaskUrlFilters();
@@ -25,6 +26,7 @@ export function TasksPage() {
   
   const [editingId, setEditingId] = useState<number | null>(null);
   const [createFormKey, setCreateFormKey] = useState(0);
+  const [pending, setPending] = useState<PendingAction | null>(null);
 
 
   const serverFilters: TaskFilters = {};
@@ -45,16 +47,32 @@ export function TasksPage() {
 
 
   const handleEdit = useCallback((id: number) => setEditingId(id), []);
+
+  const { mutate: removeTask } = remove;
+  const { mutate: moveStatus } = move;
+
+  const allRef = useRef<Task[]>([]);
+
+  useEffect(() => {
+    allRef.current = all.data ?? []
+  }, [all.data])
+
   const handleDelete = useCallback(
     (id: number) => {
-      remove.mutate(id);
-      setEditingId((current) => (current === id ? null : current));
+      setPending({ kind: 'delete', id })
     },
-    [remove],
+    [],
   );
   const handleStatusChange = useCallback(
-    (id: number, status: TaskStatus) => move.mutate({ id, status }),
-    [move],
+    (id: number, status: TaskStatus) => {
+      const current = allRef.current.find((t) => t.id === id);
+      if (current?.status === 'todo' && status === 'done') {
+        setPending({ kind: 'complete', id });
+        return;
+      }
+      moveStatus({ id, status });
+    },
+    [moveStatus],
   );
 
   const tasks = useMemo(() => viewTasks(list.data ?? [], filters), [list.data, filters]);
@@ -65,10 +83,57 @@ export function TasksPage() {
   }
 
   function handleUpdate(id: number, values: TaskFormValues) {
+    if (editing?.status === 'todo' && values.status === 'done') {
+      setPending({ kind: 'complete-edit', id, values });
+      return;
+    }
     update.mutate({ id, changes: values }, { onSuccess: () => setEditingId(null) });
+  
   }
 
+  function confirmPending() {
+    if (!pending) {
+      return 
+    }
+
+    switch(pending.kind) {
+      case 'delete': {
+        const { id } = pending;
+        removeTask(id);
+        setEditingId((current) => (current === id ? null : current));
+        break;
+      }
+      case 'complete':
+        moveStatus({ id: pending.id, status: 'done' });
+        break;
+      case 'complete-edit': {
+        const { id, values } = pending;
+        update.mutate({ id, changes: values }, { onSuccess: () => setEditingId(null) });
+        break;
+      }
+      default:
+        throw new Error(`Unhandled case: ${JSON.stringify(pending)}`);
+  
+    }
+    setPending(null);
+  }
+
+  const pendingName = all.data?.find((t) => t.id === pending?.id)?.name ?? 'this task';
+  const dialog =
+    pending?.kind === 'delete'
+      ? { title: 'Delete task?', message: `"${pendingName}" will be deleted. This cannot be undone.`, confirmLabel: 'Delete' }
+      : { title: 'Mark task as done?', message: `"${pendingName}" has not been started. Mark it as done anyway?`, confirmLabel: 'Mark as done' };
+
   return (
+    <>
+    <ConfirmDialog 
+      open={pending !== null} 
+      title={dialog.title} 
+      message={dialog.message} 
+      confirmLabel={dialog.confirmLabel}
+      onConfirm={confirmPending} 
+      onCancel={() => setPending(null)}
+    />
     <main>
       {editing ? (
         <TaskForm
@@ -143,7 +208,15 @@ export function TasksPage() {
       ) : all.data?.length === 0 ? (
         <p>No tasks yet. Add your first task above.</p>
       ) : tasks.length === 0 ? (
-        <p>No tasks match your filters</p>
+        <div>
+          <p>No tasks match your filters</p>
+          <button type='button' aria-label='Clear filter' onClick={() => {setFilters({
+            status: undefined, 
+            priority: undefined, 
+            sort: 'date',
+            q: undefined
+            })}}>Clear Filters</button>
+        </div>
       ) : (
         <TaskList
           tasks={tasks}
@@ -153,5 +226,6 @@ export function TasksPage() {
         />
       )}
     </main>
+    </>
   );
 }

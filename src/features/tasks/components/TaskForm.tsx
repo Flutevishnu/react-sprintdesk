@@ -1,13 +1,12 @@
-import  { type Task, PRIORITIES, STATUSES } from "../model";
-import * as z from 'zod';
+import  { type Task, PRIORITIES, STATUSES } from "../model/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useId } from 'react';
-import type { FieldErrors } from "../../../shared/api/http";
-import { taskFormSchema } from "../../../shared/api/schema";
+import type { FieldErrors } from "../../../shared/lib/http";
+import  { type TaskFormValues, taskFormSchema } from "../api/schema";
 
 
-export type TaskFormValues = z.infer<typeof taskFormSchema>;
+
 
 interface TaskFormProps {
     task?: Task,
@@ -84,7 +83,7 @@ export function TaskForm(
       });
       
     const nameError = errors.name?.message;
-
+    const descriptionError = errors.description?.message;
 
     return (
         <>
@@ -114,8 +113,15 @@ export function TaskForm(
                     <textarea 
                         id={`${id}-description`}
                         {...register("description")}
+                        aria-invalid={descriptionError !== undefined}
+                        aria-describedby={descriptionError ? `${id}-description-error` : undefined}
                     >
                     </textarea>
+                    {descriptionError && (
+                        <p id={`${id}-description-error`} role="alert">
+                            {descriptionError}
+                        </p>
+                    )}
                 </div>
 
                 <div>

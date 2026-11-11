@@ -1,8 +1,8 @@
 import { delay, http, HttpResponse } from 'msw';
-import type { NewTaskInput } from '../features/tasks/model';
-import type { TaskChanges, TaskStatus } from '../features/tasks/model';
+import type { NewTaskInput } from '../features/tasks/model/types';
+import type { TaskChanges, TaskStatus } from '../features/tasks/model/types';
 import { db } from './db';
-import { taskFormSchema } from '../shared/api/schema';
+import { taskFormSchema, taskPatchSchema } from '../features/tasks/api/schema';
 
 function simulatedFailure(request: Request): Response | null {
   const fail = new URL(request.url).searchParams.get('fail');
@@ -30,7 +30,10 @@ export const handlers = [
     const tasks = db
       .all()
       .filter((task) => (status ? task.status === status : true))
-      .filter((task) => task.name.toLowerCase().includes(q));
+      .filter((task) => {
+        const text = `${task.name} ${task.description ?? ''}`.toLowerCase();
+        return text.includes(q);
+      });
 
     return HttpResponse.json(tasks);
   }),
@@ -41,7 +44,7 @@ export const handlers = [
     if (failure) return failure;
 
     const body = await request.json();
-    const parsed = taskFormSchema.pick({name: true}).safeParse(body);
+    const parsed = taskFormSchema.pick({name: true, description: true}).safeParse(body);
     if(!parsed.success){
       const errors: Record<string, string> = {};
       for (const issue of parsed.error.issues){
@@ -51,7 +54,11 @@ export const handlers = [
       return HttpResponse.json({message: "Validation failed", errors}, { status: 400});
     }
 
-    const created = db.create({ ...(body as Partial<NewTaskInput>) , name: parsed.data.name.trim() } as NewTaskInput);
+    const created = db.create({ 
+      ...(body as Partial<NewTaskInput>) , 
+      name: parsed.data.name.trim(), 
+      description: parsed.data.description?.trim() 
+    } as NewTaskInput);
     return HttpResponse.json(created, { status: 201 });
   }),
 
@@ -60,8 +67,22 @@ export const handlers = [
     const failure = simulatedFailure(request);
     if (failure) return failure;
 
-    const patch = (await request.json()) as TaskChanges;
-    const updated = db.update(Number(params.id), patch);
+    const patch = (await request.json());
+    const parsed = taskPatchSchema.safeParse(patch)
+    if(!parsed.success) {
+      const errors: Record<string, string> = {}
+      for (const issue of parsed.error.issues) {
+        const field = String(issue.path[0] ?? 'form');
+        errors[field] ??= issue.message;
+      }
+
+      return HttpResponse.json(
+        {message: "Validation failed", errors}, 
+        { status: 400}
+      )
+    }
+
+    const updated = db.update(Number(params.id), parsed.data as TaskChanges);
     if (!updated) {
       return HttpResponse.json({ message: 'Task not found' }, { status: 404 });
     }

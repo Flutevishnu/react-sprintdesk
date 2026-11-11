@@ -2,19 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import type { Task } from '../model';
 import { TaskForm } from './TaskForm';
+import { makeTask as buildTask } from '../testing/fixtures';
 
-function makeTask(): Task {
-  return {
-    id: 1,
-    name: 'Write report',
-    description: 'Quarterly report',
-    status: 'in_progress',
-    priority: 'high',
-    createdAt: new Date('2026-01-01T00:00:00Z'),
-  };
-}
+const makeTask = () => buildTask({ status: 'in_progress' });
 
 describe('TaskForm: create mode', () => {
   it('starts empty with default priority and status', () => {
@@ -54,6 +45,17 @@ describe('TaskForm: create mode', () => {
 
     expect(screen.getByRole('alert')).toHaveTextContent('at most 100 characters');
   });
+
+  it('shows an error when the description is longer than 1000 characters', async () => {
+    const user = userEvent.setup();
+    render(<TaskForm onSubmit={vi.fn()} />);
+
+    await user.click(screen.getByLabelText('Description'));
+    await user.paste('a'.repeat(1001));
+    await user.tab();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('at most 1000 characters');
+  })
 
   it('shows no error for a valid title', async () => {
     const user = userEvent.setup();
