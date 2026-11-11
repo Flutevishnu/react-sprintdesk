@@ -23,6 +23,10 @@ export const taskFormSchema = z.object({
     description: z.string().trim().max(DESCRIPTION_MAX, `Description must be at most ${DESCRIPTION_MAX} characters`).optional(),
     priority: z.enum(PRIORITIES),
     status: z.enum(STATUSES),
+    due_date: z.union([
+      z.literal(''),
+      z.iso.date(),
+    ]).optional()
 });
 
 export const taskPatchSchema = taskFormSchema.partial();

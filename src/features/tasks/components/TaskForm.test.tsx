@@ -11,7 +11,7 @@ describe('TaskForm: create mode', () => {
   it('starts empty with default priority and status', () => {
     render(<TaskForm onSubmit={vi.fn()} />);
 
-    expect(screen.getByLabelText('Title')).toHaveValue('');
+    expect(screen.getByLabelText('Task Title (required)')).toHaveValue('');
     expect(screen.getByLabelText('Description')).toHaveValue('');
     expect(screen.getByLabelText('Priority')).toHaveValue('medium');
     expect(screen.getByLabelText('Status')).toHaveValue('todo');
@@ -28,18 +28,18 @@ describe('TaskForm: create mode', () => {
     const user = userEvent.setup();
     render(<TaskForm onSubmit={vi.fn()} />);
 
-    await user.type(screen.getByLabelText('Title'), 'ab');
+    await user.type(screen.getByLabelText('Task Title (required)'), 'ab');
     await user.tab();
 
     expect(screen.getByRole('alert')).toHaveTextContent('at least 3 characters');
-    expect(screen.getByLabelText('Title')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Task Title (required)')).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('shows an error when the title is longer than 100 characters', async () => {
     const user = userEvent.setup();
     render(<TaskForm onSubmit={vi.fn()} />);
 
-    await user.click(screen.getByLabelText('Title'));
+    await user.click(screen.getByLabelText('Task Title (required)'));
     await user.paste('a'.repeat(101));
     await user.tab();
 
@@ -61,7 +61,7 @@ describe('TaskForm: create mode', () => {
     const user = userEvent.setup();
     render(<TaskForm onSubmit={vi.fn()} />);
 
-    await user.type(screen.getByLabelText('Title'), 'Deploy app');
+    await user.type(screen.getByLabelText('Task Title (required)'), 'Deploy app');
     await user.tab();
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -83,7 +83,7 @@ describe('TaskForm: create mode', () => {
     const onSubmit = vi.fn();
     render(<TaskForm onSubmit={onSubmit} />);
 
-    await user.type(screen.getByLabelText('Title'), '  Deploy app  ');
+    await user.type(screen.getByLabelText('Task Title (required)'), '  Deploy app  ');
     await user.type(screen.getByLabelText('Description'), 'To staging');
     await user.selectOptions(screen.getByLabelText('Priority'), 'high');
     await user.selectOptions(screen.getByLabelText('Status'), 'in_progress');
@@ -105,7 +105,7 @@ describe('TaskForm: create mode', () => {
 
     render(<TaskForm isSubmitting onSubmit={onSubmit} />);
 
-    await user.type(screen.getByLabelText('Title'), 'Deploy app');
+    await user.type(screen.getByLabelText('Task Title (required)'), 'Deploy app');
     expect(screen.getByRole('button', { name: 'Saving...' })).toBeDisabled();
     await user.click(screen.getByRole('button', { name: 'Saving...' }));
     expect(onSubmit).not.toHaveBeenCalled();
@@ -118,10 +118,13 @@ describe('TaskForm: create mode', () => {
   
     await user.click(screen.getByRole('button', { name: 'Add task' }));
   
-    const input = screen.getByLabelText('Title');
+    const input = screen.getByLabelText('Task Title (required)');
     const message = await screen.findByText('Title must be at least 3 characters');
     expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(input).toHaveAccessibleDescription(message.textContent ?? '');
+    expect(input).toHaveAttribute(
+      'aria-describedby',
+      expect.stringContaining(message.id)
+    );
   });
   
   it('has no accessibility violations', async () => {
@@ -130,13 +133,26 @@ describe('TaskForm: create mode', () => {
     // @ts-expect-error ts is not recognising the toHaveNoViolations is present
     expect(result).toHaveNoViolations();
   });
+
+  it("links the title field to the length hint", () => {
+    render(<TaskForm onSubmit={vi.fn()} />);
+  
+    const titleInput = screen.getByLabelText("Task Title (required)");
+    const hint = screen.getByText("3–100 characters");
+  
+    expect(hint).toBeInTheDocument();
+    expect(titleInput).toHaveAttribute(
+      "aria-describedby",
+      expect.stringContaining(hint.id)
+    );
+  });
 });
 
 describe('TaskForm: edit mode', () => {
   it('starts filled with the values of the task', () => {
     render(<TaskForm task={makeTask()} onSubmit={vi.fn()} />);
 
-    expect(screen.getByLabelText('Title')).toHaveValue('Write report');
+    expect(screen.getByLabelText('Task Title (required)')).toHaveValue('Write report');
     expect(screen.getByLabelText('Description')).toHaveValue('Quarterly report');
     expect(screen.getByLabelText('Priority')).toHaveValue('high');
     expect(screen.getByLabelText('Status')).toHaveValue('in_progress');
@@ -148,8 +164,8 @@ describe('TaskForm: edit mode', () => {
     const onSubmit = vi.fn();
     render(<TaskForm task={makeTask()} onSubmit={onSubmit} />);
 
-    await user.clear(screen.getByLabelText('Title'));
-    await user.type(screen.getByLabelText('Title'), 'Write the final report');
+    await user.clear(screen.getByLabelText('Task Title (required)'));
+    await user.type(screen.getByLabelText('Task Title (required)'), 'Write the final report');
     await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -166,19 +182,19 @@ describe('TaskForm: edit mode', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
-    expect(screen.getByLabelText('Title')).toHaveValue('Write report');
+    expect(screen.getByLabelText('Task Title (required)')).toHaveValue('Write report');
   });
 
   it('restores the original values when Reset is clicked', async () => {
     const user = userEvent.setup();
     render(<TaskForm task={makeTask()} onSubmit={vi.fn()} />);
 
-    await user.clear(screen.getByLabelText('Title'));
-    await user.type(screen.getByLabelText('Title'), 'Something else');
+    await user.clear(screen.getByLabelText('Task Title (required)'));
+    await user.type(screen.getByLabelText('Task Title (required)'), 'Something else');
     await user.selectOptions(screen.getByLabelText('Priority'), 'low');
     await user.click(screen.getByRole('button', { name: 'Reset' }));
 
-    expect(screen.getByLabelText('Title')).toHaveValue('Write report');
+    expect(screen.getByLabelText('Task Title (required)')).toHaveValue('Write report');
     expect(screen.getByLabelText('Priority')).toHaveValue('high');
   });
 
