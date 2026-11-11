@@ -105,13 +105,18 @@ describe('TasksPage', () => {
   });
 
   it('deletes a task', async () => {
+    const user = userEvent.setup();
     renderPage();
     await screen.findByText('Set up project');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Delete Set up project' }));
-    await waitFor(() =>
-      expect(screen.queryByText('Set up project')).not.toBeInTheDocument(),
-    );
+    await user.click(screen.getByRole('button', { name: 'Delete Set up project' }));
+    const dialog = screen.getByRole('dialog', { name: 'Delete task?' });
+    expect(screen.getByText('Set up project')).toBeInTheDocument(); // 
+
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(screen.queryByText('Set up project')).not.toBeInTheDocument());
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
   });
 
   it('shows a server field error next to the Title input', async () => {

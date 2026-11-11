@@ -1,3 +1,4 @@
+import {type TaskFormValues } from "../api/schema";
 export const STATUSES = ['todo', 'in_progress', 'done'] as const;
 export type TaskStatus = (typeof STATUSES)[number];
 
@@ -34,3 +35,7 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
 
 export type SortKey = 'priority' | 'date';
   
+export type PendingAction =
+  | { kind: 'delete'; id: number }
+  | { kind: 'complete'; id: number }
+  | { kind: 'complete-edit'; id: number; values: TaskFormValues };
